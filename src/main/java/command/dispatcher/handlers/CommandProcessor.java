@@ -8,17 +8,17 @@ import command.service.AuctionService;
 public class CommandProcessor implements EventHandler<CommandBase> {
 
     private final Repository repository;
-    private final AuctionService controller;
+    private final AuctionService auctionService;
 
-    public CommandProcessor(Repository repository, AuctionService controller) {
+    public CommandProcessor(Repository repository, AuctionService auctionService) {
         this.repository = repository;
-        this.controller = controller;
+        this.auctionService = auctionService;
     }
 
     @Override
     public void onEvent(CommandBase commandBase, long l, boolean b) {
         try {
-            controller.processCommand(commandBase.getCommand());
+            auctionService.processCommand(commandBase.getCommand());
         } catch (Exception ex) {
             ex.printStackTrace();
         }

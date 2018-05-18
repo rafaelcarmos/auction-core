@@ -14,6 +14,7 @@ public class AuctionServiceImpl implements AuctionService {
 
     public AuctionServiceImpl(Repository repository) {
         this.repository = repository;
+        //this.replayAllEvents();
     }
 
     @Override
@@ -30,7 +31,7 @@ public class AuctionServiceImpl implements AuctionService {
         Event event = auction.handle(command);
         if (event != null) {
             auction.apply(event);
-            repository.save(event);
+            //repository.save(event);
         } else
             throw new InvalidCommandException("Could not handle " + command.getClass().getName());
 

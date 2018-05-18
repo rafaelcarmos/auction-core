@@ -10,6 +10,7 @@ import command.repository.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 public class TestMain {
     public static void main(String[] args) {
@@ -21,9 +22,9 @@ public class TestMain {
         try {
 
             if (ABQ) {
-                dispatcher = new ABQCommandDispatcher(rep, (int) Math.pow(2,19));
+                dispatcher = new ABQCommandDispatcher(rep, (int) Math.pow(2, 19));
             } else {
-                dispatcher = new DisruptorCommandDispatcher(rep, (int) Math.pow(2,19));
+                dispatcher = new DisruptorCommandDispatcher(rep, (int) Math.pow(2, 19));
             }
 
             List<JsonObject> lst = new ArrayList<>();
@@ -58,18 +59,21 @@ public class TestMain {
             lst.add(endAuction);
 
             long t1 = System.nanoTime();
+            Logger.getAnonymousLogger().info("Start: " + t1);
 
             for (JsonObject o : lst)
-                dispatcher.processCommand(o.toString());
+                dispatcher.processCommand(o);
 
             dispatcher.shutdown();
 
+
             long t2 = System.nanoTime();
-            System.out.println("Time elapsed: " + (t1 - t2));
+            Logger.getAnonymousLogger().info("End: " + t2);
+            Logger.getAnonymousLogger().info("Elapsed Time: " + (t2 - t1));
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            dispatcher.shutdown();
+        } finally {
             rep.close();
         }
     }

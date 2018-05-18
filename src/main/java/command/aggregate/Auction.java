@@ -62,14 +62,10 @@ public class Auction {
 
     public AuctionCreated onCommand(CreateAuction cmd) {
 
-        List<Event> result = new ArrayList<Event>();
-
         return new AuctionCreated(cmd.getAuctionId(), cmd.getTimestamp(), cmd.getAuctioneerId(), cmd.getItemId(), cmd.getStartPrice());
     }
 
     public AuctionEnded onCommand(EndAuction cmd) throws Exception {
-
-        List<Event> result = new ArrayList<Event>();
 
         if (state == AuctionState.CREATED) {
             throw new AuctionNotStartedException("Auction hasn't started");
@@ -87,8 +83,6 @@ public class Auction {
     }
 
     public BidPlaced onCommand(PlaceBid cmd) throws Exception {
-
-        List<Event> result = new ArrayList<Event>();
 
         if (state == AuctionState.CREATED) {
             throw new AuctionNotStartedException("Auction hasn't started");

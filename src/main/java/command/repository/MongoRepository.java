@@ -6,8 +6,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import command.aggregate.Auction;
 import command.events.*;
-import command.repository.exceptions.AggregateExistantException;
-import command.repository.exceptions.AggregateNonExistantException;
+import command.repository.exceptions.AggregateExistentException;
+import command.repository.exceptions.AggregateNonExistentException;
 import org.bson.Document;
 
 import java.time.LocalDateTime;
@@ -19,7 +19,7 @@ public class MongoRepository implements Repository {
     private final MongoCollection<Document> eventCollection;
     private final MongoDatabase db;
     private final MongoClient mongoClient;
-    private Map<UUID, Auction> auctionMap = new HashMap<>();
+    private final Map<UUID, Auction> auctionMap = new HashMap<>();
 
     public MongoRepository(String mongoAddress, String databaseName, String collectionName) {
         mongoClient = new MongoClient(mongoAddress);
@@ -90,18 +90,18 @@ public class MongoRepository implements Repository {
     }
 
     @Override
-    public Auction getAuction(UUID id) throws AggregateNonExistantException {
+    public Auction getAuction(UUID id) throws AggregateNonExistentException {
         if (auctionMap.containsKey(id)) {
             return auctionMap.get(id);
         } else {
-            throw new AggregateNonExistantException("Aggregate " + id.toString() + "does not exist");
+            throw new AggregateNonExistentException("Aggregate " + id.toString() + "does not exist");
         }
     }
 
     @Override
-    public Auction createAndGetAuction(UUID id) throws AggregateExistantException {
+    public Auction createAndGetAuction(UUID id) throws AggregateExistentException {
         if (auctionMap.containsKey(id)) {
-            throw new AggregateExistantException("Aggregate " + id.toString() + "already exists");
+            throw new AggregateExistentException("Aggregate " + id.toString() + "already exists");
         } else {
             Auction auction = new Auction(id);
             auctionMap.put(id, auction);

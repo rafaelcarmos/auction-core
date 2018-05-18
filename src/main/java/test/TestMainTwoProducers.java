@@ -10,14 +10,13 @@ import command.repository.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.logging.Logger;
 
 public class TestMainTwoProducers {
     public static void main(String[] args) {
 
-        boolean ABQ = true;
+        boolean ABQ = false;
         Repository rep = new MongoRepository("localhost:27017", "command", "events");
         final CommandDispatcher dispatcher;
 
@@ -63,12 +62,12 @@ public class TestMainTwoProducers {
             }
 
             long t1 = System.nanoTime();
-
+            Logger.getAnonymousLogger().info("Start: " + t1);
 
             Thread thread1 = Executors.defaultThreadFactory().newThread(() -> {
                 try {
                     for (JsonObject o : lst1)
-                        dispatcher.processCommand(o.toString());
+                        dispatcher.processCommand(o);
                 }catch(Exception e){
                     e.printStackTrace();
                 }
@@ -77,24 +76,24 @@ public class TestMainTwoProducers {
             Thread thread2 = Executors.defaultThreadFactory().newThread(() -> {
                 try {
                     for (JsonObject o : lst2)
-                        dispatcher.processCommand(o.toString());
+                        dispatcher.processCommand(o);
                 }catch(Exception e){
                     e.printStackTrace();
                 }
             });
 
-            dispatcher.processCommand(createAuction.toString());
-            dispatcher.processCommand(startAuction.toString());
+            dispatcher.processCommand(createAuction);
+            dispatcher.processCommand(startAuction);
             thread1.start();
             thread2.start();
             thread1.join();
             thread2.join();
-            dispatcher.processCommand(endAuction.toString());
+            dispatcher.processCommand(endAuction);
             dispatcher.shutdown();
 
             long t2 = System.nanoTime();
-
-            System.out.println("Time elapsed: " + (t2 - t1));
+            Logger.getAnonymousLogger().info("End: " + t2);
+            Logger.getAnonymousLogger().info("Elapsed Time: " + (t2 - t1));
 
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -1,5 +1,6 @@
 package command.dispatcher;
 
+import com.google.gson.JsonObject;
 import command.commands.Command;
 
 import java.time.LocalDateTime;
@@ -8,7 +9,7 @@ public class CommandBase {
 
     private LocalDateTime timestamp;
     private Command command;
-    private String rawMessage;
+    private JsonObject rawMessage;
 
     public CommandBase() {
 
@@ -30,11 +31,11 @@ public class CommandBase {
         this.command = command;
     }
 
-    public String getRawMessage() {
+    public JsonObject getRawMessage() {
         return rawMessage;
     }
 
-    public void setRawMessage(String rawMessage) {
+    public void setRawMessage(JsonObject rawMessage) {
         this.rawMessage = rawMessage;
     }
 }

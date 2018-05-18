@@ -1,13 +1,5 @@
 package query.model;
 
-import command.aggregate.exceptions.AuctionCancelledException;
-import command.aggregate.exceptions.AuctionEndedException;
-import command.aggregate.exceptions.AuctionNotStartedException;
-import command.aggregate.exceptions.InvalidBidException;
-import command.commands.*;
-import command.events.*;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 

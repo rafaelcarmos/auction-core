@@ -1,8 +1,10 @@
 package command.dispatcher;
 
+import com.google.gson.JsonObject;
+
 public interface CommandDispatcher {
 
-    void processCommand(String rawMessage) throws Exception;
+    void processCommand(JsonObject rawMessage) throws Exception;
 
     void shutdown();
 }

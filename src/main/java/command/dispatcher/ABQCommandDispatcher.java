@@ -1,7 +1,7 @@
 package command.dispatcher;
 
+import com.google.gson.JsonObject;
 import command.dispatcher.handlers.CommandParser;
-import command.dispatcher.handlers.CommandProcessor;
 import command.repository.Repository;
 import command.service.AuctionService;
 import command.service.AuctionServiceImpl;
@@ -17,21 +17,16 @@ public class ABQCommandDispatcher implements CommandDispatcher {
     private Thread consumer;
     private boolean stopped = false;
 
-    public ABQCommandDispatcher(Repository repository, int queueSize) throws Exception {
+    public ABQCommandDispatcher(Repository repository, int queueSize) {
         this.repository = repository;
-        this.auctionService = new AuctionServiceImpl(repository);
-        auctionService.replayAllEvents();
-        this.queue = new ArrayBlockingQueue<CommandBase>(queueSize);
-
-        consumer = Executors.defaultThreadFactory().newThread(() -> {
-            ConsumeQueue();
-        });
-
+        auctionService = new AuctionServiceImpl(repository);
+        queue = new ArrayBlockingQueue<>(queueSize);
+        consumer = Executors.defaultThreadFactory().newThread(this::ConsumeQueue);
         consumer.start();
     }
 
     @Override
-    public void processCommand(String rawMessage) throws Exception {
+    public void processCommand(JsonObject rawMessage) throws Exception {
         CommandBase cmd = new CommandBase();
         cmd.setRawMessage(rawMessage);
         queue.put(cmd);
@@ -48,14 +43,13 @@ public class ABQCommandDispatcher implements CommandDispatcher {
     }
 
     private void ConsumeQueue() {
-        CommandParser parser = new CommandParser();
-        CommandProcessor processor = new CommandProcessor(repository, auctionService);
-        CommandBase cmd = null;
+        CommandParser parser = new CommandParser(auctionService);
+        CommandBase cmd;
+
         while (!stopped || !queue.isEmpty()) {
             cmd = queue.poll();
             if (cmd != null) {
                 parser.onEvent(cmd, 0, true);
-                processor.onEvent(cmd, 0, true);
             }
         }
     }
