@@ -9,8 +9,5 @@
         <module name="auction-core" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="auction-core" target="8" />
-    </bytecodeTargetLevel>
   </component>
 </project>

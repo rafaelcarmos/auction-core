@@ -2,6 +2,7 @@ package command.dispatcher;
 
 import com.google.gson.JsonObject;
 import command.dispatcher.handlers.CommandParser;
+import command.dispatcher.handlers.CommandProcessor;
 import command.repository.Repository;
 import command.service.AuctionService;
 import command.service.AuctionServiceImpl;
@@ -43,13 +44,15 @@ public class ABQCommandDispatcher implements CommandDispatcher {
     }
 
     private void ConsumeQueue() {
-        CommandParser parser = new CommandParser(auctionService);
+        CommandParser parser = new CommandParser();
+        CommandProcessor processor = new CommandProcessor(repository, auctionService);
         CommandBase cmd;
 
         while (!stopped || !queue.isEmpty()) {
             cmd = queue.poll();
             if (cmd != null) {
-                parser.onEvent(cmd, 0, true);
+                parser.onEvent(cmd, 0, false);
+                processor.onEvent(cmd, 0, false);
             }
         }
     }

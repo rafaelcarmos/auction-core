@@ -5,7 +5,6 @@ import com.google.gson.JsonParser;
 import com.lmax.disruptor.EventHandler;
 import command.commands.*;
 import command.dispatcher.CommandBase;
-import command.service.AuctionService;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -13,11 +12,10 @@ import java.util.UUID;
 public class CommandParser implements EventHandler<CommandBase> {
 
     private final JsonParser jsonParser = new JsonParser();
-    private final AuctionService auctionService;
 
-    public CommandParser(AuctionService auctionService) {
-        this.auctionService = auctionService;
+    public CommandParser() {
     }
+
 
     @Override
     public void onEvent(CommandBase commandBase, long l, boolean b) {
@@ -65,7 +63,6 @@ public class CommandParser implements EventHandler<CommandBase> {
             }
 
             commandBase.setCommand(command);
-            auctionService.processCommand(command);
 
         } catch (Exception ex) {
             ex.printStackTrace();
