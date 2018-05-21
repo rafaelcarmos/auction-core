@@ -13,23 +13,41 @@ import org.bson.Document;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MongoRepository implements Repository {
 
+    private final Timer commitToMongoTimer;
+    private final ArrayBlockingQueue<Document> uncomittedEvents;
     private final MongoCollection<Document> eventCollection;
     private final MongoDatabase db;
     private final MongoClient mongoClient;
-    private final Map<UUID, Auction> auctionMap = new HashMap<>();
+    private final Map<UUID, Auction> auctionMap = new ConcurrentHashMap<>();
 
     public MongoRepository(String mongoAddress, String databaseName, String collectionName) {
+        uncomittedEvents = new ArrayBlockingQueue<Document>(10000);
         mongoClient = new MongoClient(mongoAddress);
         db = mongoClient.getDatabase(databaseName);
         eventCollection = db.getCollection(collectionName);
+
+        commitToMongoTimer = new Timer();
+        commitToMongoTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (!uncomittedEvents.isEmpty()) {
+                    List<Document> lst = new ArrayList<>();
+                    uncomittedEvents.drainTo(lst);
+                    eventCollection.insertMany(lst);
+                    lst.clear();
+                }
+            }
+        }, 0, 1000);
     }
 
     @Override
-    public void save(Event e) {
-        eventCollection.insertOne(e.getDocument());
+    public void save(Event e) throws Exception {
+        uncomittedEvents.put(e.getDocument());
     }
 
     @Override
@@ -94,14 +112,14 @@ public class MongoRepository implements Repository {
         if (auctionMap.containsKey(id)) {
             return auctionMap.get(id);
         } else {
-            throw new AggregateNonExistentException("Aggregate " + id.toString() + "does not exist");
+            throw new AggregateNonExistentException("Aggregate " + id.toString() + " does not exist");
         }
     }
 
     @Override
     public Auction createAndGetAuction(UUID id) throws AggregateExistentException {
         if (auctionMap.containsKey(id)) {
-            throw new AggregateExistentException("Aggregate " + id.toString() + "already exists");
+            throw new AggregateExistentException("Aggregate " + id.toString() + " already exists");
         } else {
             Auction auction = new Auction(id);
             auctionMap.put(id, auction);
@@ -111,6 +129,12 @@ public class MongoRepository implements Repository {
 
     @Override
     public void close() {
-        mongoClient.close();
+        try {
+            commitToMongoTimer.cancel();
+            Thread.sleep(1000);
+            mongoClient.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 }

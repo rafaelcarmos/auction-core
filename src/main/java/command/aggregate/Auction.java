@@ -6,6 +6,7 @@ import command.aggregate.exceptions.AuctionNotStartedException;
 import command.aggregate.exceptions.InvalidBidException;
 import command.commands.*;
 import command.events.*;
+import test.CallbackCommand;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -120,6 +121,10 @@ public class Auction {
         }
 
         return new AuctionStarted(cmd.getAuctionId(), cmd.getTimestamp());
+    }
+
+    public Event onCommand(CallbackCommand cmd) {
+        return null;
     }
 
     public void onEvent(AuctionCancelled evt) {

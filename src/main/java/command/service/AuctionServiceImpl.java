@@ -1,7 +1,6 @@
 package command.service;
 
 import command.aggregate.Auction;
-import command.aggregate.exceptions.InvalidCommandException;
 import command.commands.Command;
 import command.commands.CreateAuction;
 import command.events.AuctionCreated;
@@ -31,10 +30,8 @@ public class AuctionServiceImpl implements AuctionService {
         Event event = auction.handle(command);
         if (event != null) {
             auction.apply(event);
-            //repository.save(event);
-        } else
-            throw new InvalidCommandException("Could not handle " + command.getClass().getName());
-
+            repository.save(event);
+        }
     }
 
     @Override

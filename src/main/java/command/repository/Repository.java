@@ -10,9 +10,9 @@ import java.util.UUID;
 
 public interface Repository {
 
-    void save(Event e);
+    void save(Event e) throws Exception;
 
-    void save(Iterable<Event> e);
+    void save(Iterable<Event> e) throws Exception;
 
     List<Event> getEvents();
 
