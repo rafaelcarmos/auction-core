@@ -84,7 +84,7 @@ public class MongoRepository implements Repository {
                 UUID auctioneerId = UUID.fromString(data.get("auctioneerId").toString());
                 UUID itemId = UUID.fromString(data.get("itemId").toString());
                 double startPrice = (double) data.get("startPrice");
-                event = new AuctionCreated(auctionId, timestamp, auctioneerId, itemId, startPrice);
+                event = new AuctionCreated(auctionId, timestamp, auctioneerId, itemId);
                 break;
             }
             case "AuctionEnded":

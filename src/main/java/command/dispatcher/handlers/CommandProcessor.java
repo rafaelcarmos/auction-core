@@ -40,7 +40,7 @@ public class CommandProcessor implements EventHandler<CommandBase> {
                     UUID auctioneerId = UUID.fromString(json.get("auctioneerId").getAsString());
                     UUID itemId = UUID.fromString(json.get("itemId").getAsString());
                     double startPrice = json.get("startPrice").getAsDouble();
-                    command = new CreateAuction(auctionId, timestamp, auctioneerId, itemId, startPrice);
+                    command = new CreateAuction(auctionId, timestamp, auctioneerId, itemId);
                     break;
                 }
                 case "EndAuction": {
@@ -58,14 +58,15 @@ public class CommandProcessor implements EventHandler<CommandBase> {
                     break;
                 }
                 case "CallbackCommand": {
-                    synchronized (json) {
-                        json.notifyAll();
-                    }
                     command = new CallbackCommand(auctionId, timestamp);
                     break;
                 }
                 default:
                     throw new RuntimeException("Invalid command type :" + commandType);
+            }
+
+            synchronized (json) {
+                json.notifyAll();
             }
 
             commandBase.setCommand(command);

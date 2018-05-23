@@ -3,7 +3,6 @@ package command.aggregate;
 import command.aggregate.exceptions.AuctionCancelledException;
 import command.aggregate.exceptions.AuctionEndedException;
 import command.aggregate.exceptions.AuctionNotStartedException;
-import command.aggregate.exceptions.InvalidBidException;
 import command.commands.*;
 import command.events.*;
 import test.CallbackCommand;
@@ -21,7 +20,6 @@ public class Auction {
     private static final List<Method> applyMethods = Arrays.stream(Auction.class.getMethods()).filter(m -> m.getName().contains("onEvent")).collect(Collectors.toList());
     private UUID auctioneerId;
     private UUID itemId;
-    private double startPrice;
     private UUID currentWinnerId;
     private double currentWinningBid = 0;
     private AuctionState state;
@@ -63,7 +61,7 @@ public class Auction {
 
     public AuctionCreated onCommand(CreateAuction cmd) {
 
-        return new AuctionCreated(cmd.getAuctionId(), cmd.getTimestamp(), cmd.getAuctioneerId(), cmd.getItemId(), cmd.getStartPrice());
+        return new AuctionCreated(cmd.getAuctionId(), cmd.getTimestamp(), cmd.getAuctioneerId(), cmd.getItemId());
     }
 
     public AuctionEnded onCommand(EndAuction cmd) throws Exception {
@@ -96,10 +94,6 @@ public class Auction {
         if (state == AuctionState.ENDED) {
             throw new AuctionEndedException("Auction has already ended");
         }
-
-        if (currentWinningBid == 0)
-            if (cmd.getAmount() < startPrice)
-                throw new InvalidBidException("Bid amount is less than start price");
 
         return new BidPlaced(cmd.getAuctionId(), cmd.getTimestamp(), cmd.getBidderId(), cmd.getAmount());
     }
@@ -134,7 +128,6 @@ public class Auction {
     public void onEvent(AuctionCreated evt) {
         auctioneerId = evt.getAuctioneerId();
         itemId = evt.getItemId();
-        startPrice = evt.getStartPrice();
         state = AuctionState.CREATED;
     }
 

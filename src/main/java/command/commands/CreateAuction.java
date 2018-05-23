@@ -6,13 +6,11 @@ import java.util.UUID;
 public class CreateAuction extends Command {
     private final UUID auctioneerId;
     private final UUID itemId;
-    private final double startPrice;
 
-    public CreateAuction(UUID auctionId, LocalDateTime timestamp, UUID auctioneerId, UUID itemId, double startPrice) {
+    public CreateAuction(UUID auctionId, LocalDateTime timestamp, UUID auctioneerId, UUID itemId) {
         super(auctionId, timestamp);
         this.auctioneerId = auctioneerId;
         this.itemId = itemId;
-        this.startPrice = startPrice;
     }
 
     public final UUID getAuctioneerId() {
@@ -21,9 +19,5 @@ public class CreateAuction extends Command {
 
     public final UUID getItemId() {
         return itemId;
-    }
-
-    public double getStartPrice() {
-        return startPrice;
     }
 }

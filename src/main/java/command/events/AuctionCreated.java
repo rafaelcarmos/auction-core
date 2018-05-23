@@ -8,13 +8,11 @@ import java.util.UUID;
 public class AuctionCreated extends Event {
     private final UUID auctioneerId;
     private final UUID itemId;
-    private final double startPrice;
 
-    public AuctionCreated(UUID auctionId, LocalDateTime timestamp, UUID auctioneerId, UUID itemId, double startPrice) {
+    public AuctionCreated(UUID auctionId, LocalDateTime timestamp, UUID auctioneerId, UUID itemId) {
         super(auctionId, timestamp);
         this.auctioneerId = auctioneerId;
         this.itemId = itemId;
-        this.startPrice = startPrice;
     }
 
     public final UUID getAuctioneerId() {
@@ -25,15 +23,10 @@ public class AuctionCreated extends Event {
         return itemId;
     }
 
-    public double getStartPrice() {
-        return startPrice;
-    }
-
     @Override
     public Document getEventDataDocument() {
         return new Document()
                 .append("auctioneerId", auctioneerId.toString())
-                .append("itemId", itemId.toString())
-                .append("startPrice", startPrice);
+                .append("itemId", itemId.toString());
     }
 }
