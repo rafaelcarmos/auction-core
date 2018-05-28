@@ -13,41 +13,41 @@ import org.bson.Document;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MongoRepository implements Repository {
 
-    private final Timer commitToMongoTimer;
-    private final ArrayBlockingQueue<Document> uncomittedEvents;
+    //private final Timer commitToMongoTimer;
+    //private final ArrayBlockingQueue<Document> uncomittedEvents;
     private final MongoCollection<Document> eventCollection;
     private final MongoDatabase db;
     private final MongoClient mongoClient;
     private final Map<UUID, Auction> auctionMap = new ConcurrentHashMap<>();
 
     public MongoRepository(String mongoAddress, String databaseName, String collectionName) {
-        uncomittedEvents = new ArrayBlockingQueue<Document>(10000);
+        //uncomittedEvents = new ArrayBlockingQueue<Document>(10000);
         mongoClient = new MongoClient(mongoAddress);
         db = mongoClient.getDatabase(databaseName);
         eventCollection = db.getCollection(collectionName);
 
-        commitToMongoTimer = new Timer();
-        commitToMongoTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (!uncomittedEvents.isEmpty()) {
-                    List<Document> lst = new ArrayList<>();
-                    uncomittedEvents.drainTo(lst);
-                    eventCollection.insertMany(lst);
-                    lst.clear();
-                }
-            }
-        }, 0, 1000);
+//        commitToMongoTimer = new Timer();
+//        commitToMongoTimer.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//                if (!uncomittedEvents.isEmpty()) {
+//                    List<Document> lst = new ArrayList<>();
+//                    uncomittedEvents.drainTo(lst);
+//                    eventCollection.insertMany(lst);
+//                    lst.clear();
+//                }
+//            }
+//        }, 0, 1000);
     }
 
     @Override
-    public void save(Event e) throws Exception {
-        uncomittedEvents.put(e.getDocument());
+    public void save(Event e) {
+        eventCollection.insertOne(e.getDocument());
+        //uncomittedEvents.put(e.getDocument());
     }
 
     @Override
@@ -130,8 +130,8 @@ public class MongoRepository implements Repository {
     @Override
     public void close() {
         try {
-            commitToMongoTimer.cancel();
-            Thread.sleep(1000);
+            //commitToMongoTimer.cancel();
+            //Thread.currentThread().sleep(2000);
             mongoClient.close();
         } catch (Exception ex) {
             ex.printStackTrace();

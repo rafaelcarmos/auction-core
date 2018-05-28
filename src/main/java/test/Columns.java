@@ -56,7 +56,7 @@ public class Columns {
         while (word.length() < newLength) {
             word += " ";
         }
-        word += "  ";
+        word += "     ";
         return word;
     }
 }

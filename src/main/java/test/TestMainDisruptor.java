@@ -21,9 +21,12 @@ public class TestMainDisruptor {
 
             TestBase test = new TestBase();
 
-            for (int i = 1; i < 33; i = i * 2) {
-                test.run(size, i, iterations, rep, disruptorCommandDispatcher);
+            for (int i = 1; i < 20; i = i * 2) {
+                TestResults results = test.run(size, i, iterations, rep, disruptorCommandDispatcher);
+                System.out.println(String.format("[%s][Producers: %d][Size: %d]", results.getType(), i, size));
+                System.out.println(results.printTest());
             }
+
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {

@@ -8,23 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class TestBase {
 
     private int currentSize = 0;
 
 
-    public void run(int size, int producers, int iterations, Repository repository, CommandDispatcher dispatcher) throws Exception {
-
-        long[] results = new long[iterations];
-        Thread[] threads = new Thread[producers];
+    public TestResults run(int size, int producers, int iterations, Repository repository, CommandDispatcher dispatcher) throws Exception {
 
         UUID auctionId = UUID.randomUUID();
 
-        System.out.println("Generating commands...");
         List<JsonObject> commands = getCommands(size - 3, auctionId);
-        System.out.print("OK\n");
 
         JsonObject createAuction = new JsonObject();
         createAuction.addProperty("auctionId", auctionId.toString());
@@ -48,6 +42,9 @@ public class TestBase {
         dispatcher.processCommand(createAuction);
         dispatcher.processCommand(startAuction);
 
+        Thread[] threads = new Thread[producers];
+        TestResults results = new TestResults(dispatcher.getClass().getSimpleName());
+
         for (int i = 0; i < iterations; i++) {
 
             long t1 = System.nanoTime();
@@ -70,33 +67,12 @@ public class TestBase {
                 callback.wait();
                 long t2 = System.nanoTime();
                 long diff = (t2 - t1);
-                results[i] = diff;
+
+                results.addIteration(new IterationResults(producers, diff, size));
             }
         }
 
-        long timeSum = 0;
-        System.out.println(String.format("[Dispatcher: %s][Size: %d][Producers: %d]", dispatcher.getClass().getSimpleName(), size, producers));
-        Columns cols = new Columns();
-        cols.addLine("#", "NANO", "MICRO", "MILLI");
-        for (int i = 0; i < results.length; i++) {
-            timeSum += results[i];
-            long micro = TimeUnit.MICROSECONDS.convert(results[i], TimeUnit.NANOSECONDS);
-            long milli = TimeUnit.MILLISECONDS.convert(results[i], TimeUnit.NANOSECONDS);
-
-            cols.addLine(String.valueOf(i), String.valueOf(results[i]), String.valueOf(micro), String.valueOf(milli));
-        }
-
-        long average = timeSum / results.length;
-        long avgMicro = TimeUnit.MICROSECONDS.convert(average, TimeUnit.NANOSECONDS);
-        long avgMilli = TimeUnit.MILLISECONDS.convert(average, TimeUnit.NANOSECONDS);
-
-        long median = results.length % 2 == 0 ? (results[results.length / 2] + results[(results.length / 2) + 1]) / 2 : results[(results.length / 2) + 1];
-        long mdnMicro = TimeUnit.MICROSECONDS.convert(median, TimeUnit.NANOSECONDS);
-        long mdnMilli = TimeUnit.MILLISECONDS.convert(median, TimeUnit.NANOSECONDS);
-
-        cols.addLine("AVG", String.valueOf(average), String.valueOf(avgMicro), String.valueOf(avgMilli));
-        cols.addLine("MDN", String.valueOf(median), String.valueOf(mdnMicro), String.valueOf(mdnMilli));
-        cols.print();
+        return results;
     }
 
     private void asyncProducer(int size, int mySeq, List<JsonObject> commands, CommandDispatcher dispatcher) {

@@ -5,12 +5,9 @@ import command.dispatcher.CommandDispatcher;
 import command.dispatcher.DisruptorCommandDispatcher;
 import command.repository.MongoRepository;
 import command.repository.Repository;
+import org.openjdk.jmh.Main;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Setup;
-import org.openjdk.jmh.runner.Runner;
-import org.openjdk.jmh.runner.RunnerException;
-import org.openjdk.jmh.runner.options.Options;
-import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.UUID;
 
@@ -19,13 +16,8 @@ public class AuctionCoreBenchmark {
     CommandDispatcher disruptorCommandDispatcher = null;
     private UUID auctionId = UUID.randomUUID();
 
-    public static void main(String[] args) throws RunnerException {
-        Options opt = new OptionsBuilder()
-                .include(AuctionCoreBenchmark.class.getSimpleName())
-                .forks(1)
-                .build();
-
-        new Runner(opt).run();
+    public static void main(String[] args) throws Exception {
+        Main.main(args);
     }
 
     @Setup
