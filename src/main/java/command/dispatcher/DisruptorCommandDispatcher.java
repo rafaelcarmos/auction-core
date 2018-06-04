@@ -1,7 +1,7 @@
 package command.dispatcher;
 
 import com.google.gson.JsonObject;
-import com.lmax.disruptor.YieldingWaitStrategy;
+import com.lmax.disruptor.BusySpinWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import command.dispatcher.handlers.CommandProcessor;
@@ -20,7 +20,7 @@ public class DisruptorCommandDispatcher implements CommandDispatcher {
     public DisruptorCommandDispatcher(Repository repository, int bufferSize) {
         this.repository = repository;
         auctionService = new AuctionServiceImpl(repository);
-        disruptor = new Disruptor<>(CommandBase::new, bufferSize, Executors.defaultThreadFactory(), ProducerType.MULTI, new YieldingWaitStrategy());
+        disruptor = new Disruptor<>(CommandBase::new, bufferSize, Executors.defaultThreadFactory(), ProducerType.MULTI, new BusySpinWaitStrategy());
         disruptor.handleEventsWith(new CommandProcessor(repository, auctionService));
         disruptor.start();
     }
