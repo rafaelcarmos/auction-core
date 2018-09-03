@@ -6,7 +6,6 @@ import command.commands.*;
 import command.dispatcher.CommandBase;
 import command.repository.Repository;
 import command.service.AuctionService;
-import test.CallbackCommand;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -58,15 +57,13 @@ public class CommandProcessor implements EventHandler<CommandBase> {
                     break;
                 }
                 case "CallbackCommand": {
-                    command = new CallbackCommand(auctionId, timestamp);
-                    break;
+                    synchronized (json) {
+                        json.notifyAll();
+                    }
+                    return;
                 }
                 default:
                     throw new RuntimeException("Invalid command type :" + commandType);
-            }
-
-            synchronized (json) {
-                json.notifyAll();
             }
 
             commandBase.setCommand(command);

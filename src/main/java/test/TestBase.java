@@ -2,7 +2,6 @@ package test;
 
 import com.google.gson.JsonObject;
 import command.dispatcher.CommandDispatcher;
-import command.repository.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +13,7 @@ public class TestBase {
     private int currentSize = 0;
 
 
-    public TestResults run(int size, int producers, int iterations, Repository repository, CommandDispatcher dispatcher) throws Exception {
+    public TestResults run(int size, int producers, int iterations, CommandDispatcher dispatcher) throws Exception {
 
         UUID auctionId = UUID.randomUUID();
 
@@ -47,12 +46,14 @@ public class TestBase {
 
         for (int i = 0; i < iterations; i++) {
 
-            long t1 = System.nanoTime();
+            System.gc();
 
             for (int j = 0; j < producers; j++) {
                 final int seq = j;
                 threads[j] = Executors.defaultThreadFactory().newThread(() -> asyncProducer(size - 3, seq, commands, dispatcher));
             }
+
+            long t1 = System.nanoTime();
 
             for (Thread t : threads) {
                 t.start();
@@ -67,7 +68,6 @@ public class TestBase {
                 callback.wait();
                 long t2 = System.nanoTime();
                 long diff = (t2 - t1);
-
                 results.addIteration(new IterationResults(producers, diff, size));
             }
         }

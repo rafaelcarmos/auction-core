@@ -30,7 +30,7 @@ public class AuctionServiceImpl implements AuctionService {
         Event event = auction.handle(command);
         if (event != null) {
             auction.apply(event);
-            repository.save(event);
+            //repository.save(event);
         }
     }
 
