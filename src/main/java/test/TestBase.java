@@ -1,7 +1,7 @@
 package test;
 
 import com.google.gson.JsonObject;
-import command.dispatcher.CommandDispatcher;
+import messaging.CommandDispatcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,14 +19,14 @@ public class TestBase {
 
         List<JsonObject> commands = getCommands(size - 3, auctionId);
 
-        JsonObject createAuction = new JsonObject();
+        String createAuction = new JsonObject();
         createAuction.addProperty("auctionId", auctionId.toString());
         createAuction.addProperty("commandType", "CreateAuction");
         createAuction.addProperty("auctioneerId", UUID.randomUUID().toString());
         createAuction.addProperty("itemId", UUID.randomUUID().toString());
         createAuction.addProperty("startPrice", 1200d);
 
-        JsonObject startAuction = new JsonObject();
+        String startAuction = new JsonObject();
         startAuction.addProperty("commandType", "StartAuction");
         startAuction.addProperty("auctionId", auctionId.toString());
 
@@ -34,7 +34,7 @@ public class TestBase {
         endAuction.addProperty("commandType", "EndAuction");
         endAuction.addProperty("auctionId", auctionId.toString());
 
-        JsonObject callback = new JsonObject();
+        String callback = new JsonObject();
         callback.addProperty("commandType", "CallbackCommand");
         callback.addProperty("auctionId", auctionId.toString());
 

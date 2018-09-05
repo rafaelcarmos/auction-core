@@ -1,6 +1,6 @@
 package command.service;
 
-import command.commands.Command;
+import domain.auction.commands.Command;
 
 public interface AuctionService {
     void processCommand(Command command) throws Exception;

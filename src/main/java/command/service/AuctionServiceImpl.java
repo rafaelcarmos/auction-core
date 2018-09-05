@@ -1,11 +1,11 @@
 package command.service;
 
-import command.aggregate.Auction;
-import command.commands.Command;
-import command.commands.CreateAuction;
-import command.events.AuctionCreated;
-import command.events.Event;
-import command.repository.Repository;
+import domain.Repository;
+import domain.auction.Auction;
+import domain.auction.commands.Command;
+import domain.auction.commands.CreateAuction;
+import domain.auction.events.AuctionCreated;
+import domain.auction.events.Event;
 
 public class AuctionServiceImpl implements AuctionService {
 
