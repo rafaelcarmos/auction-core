@@ -1,11 +1,11 @@
 package messaging.abq;
 
-import command.service.AuctionService;
-import command.service.AuctionServiceImpl;
-import domain.Repository;
+import domain.auction.AuctionService;
+import domain.auction.AuctionServiceImpl;
+import domain.auction.repository.Repository;
 import messaging.CommandBase;
 import messaging.CommandDispatcher;
-import messaging.handlers.CommandProcessor;
+import messaging.handlers.CommandParser;
 import test.ShutdownCommand;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -35,7 +35,7 @@ public class ABQCommandDispatcher implements CommandDispatcher {
     }
 
     private void consumeQueue() {
-        CommandProcessor processor = new CommandProcessor(repository, auctionService);
+        CommandParser processor = new CommandParser(repository, auctionService);
         CommandBase cmd;
 
         while (!stopped) {
@@ -62,7 +62,7 @@ public class ABQCommandDispatcher implements CommandDispatcher {
         try {
 
             CommandBase poisonMessage = new CommandBase();
-            poisonMessage.setCommand(new ShutdownCommand(null, null));
+            poisonMessage.setCommand(new ShutdownCommand(-1, -1));
 
             //Kill consumer thread
             queue.put(poisonMessage);

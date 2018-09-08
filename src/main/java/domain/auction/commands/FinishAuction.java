@@ -3,9 +3,9 @@ package domain.auction.commands;
 import domain.auction.Auction;
 import domain.auction.events.Event;
 
-public class StartAuction extends Command {
+public class FinishAuction extends Command {
 
-    public StartAuction(long auctionId, long timestamp) {
+    public FinishAuction(long auctionId, long timestamp) {
         super(auctionId, timestamp);
     }
 

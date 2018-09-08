@@ -1,6 +1,6 @@
 package domain.auction.events;
 
-import org.bson.Document;
+import domain.auction.Auction;
 
 public class AuctionStarted extends Event {
 
@@ -9,7 +9,7 @@ public class AuctionStarted extends Event {
     }
 
     @Override
-    public Document getEventDataDocument() {
-        return new Document();
+    public void accept(Auction auction) {
+        auction.onEvent(this);
     }
 }

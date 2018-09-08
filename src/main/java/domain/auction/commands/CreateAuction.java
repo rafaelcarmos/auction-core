@@ -1,22 +1,28 @@
 package domain.auction.commands;
 
-import java.util.UUID;
+import domain.auction.Auction;
+import domain.auction.events.Event;
 
 public class CreateAuction extends Command {
-    private final UUID auctioneerId;
-    private final UUID itemId;
+    private final long auctioneerId;
+    private final long itemId;
 
-    public CreateAuction(long auctionId, long timestamp, UUID auctioneerId, UUID itemId) {
+    public CreateAuction(long auctionId, long timestamp, long auctioneerId, long itemId) {
         super(auctionId, timestamp);
         this.auctioneerId = auctioneerId;
         this.itemId = itemId;
     }
 
-    public final UUID getAuctioneerId() {
+    public final long getAuctioneerId() {
         return auctioneerId;
     }
 
-    public final UUID getItemId() {
+    public final long getItemId() {
         return itemId;
+    }
+
+    @Override
+    public Event accept(Auction auction) {
+        return auction.onCommand(this);
     }
 }

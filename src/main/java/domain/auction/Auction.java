@@ -6,39 +6,48 @@ import domain.auction.exceptions.AuctionCancelledException;
 import domain.auction.exceptions.AuctionEndedException;
 import domain.auction.exceptions.AuctionNotStartedException;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class Auction {
-    private final UUID id;
-    private static final List<Method> handleMethods = Arrays.stream(Auction.class.getMethods()).filter(m -> m.getName().contains("onCommand")).collect(Collectors.toList());
-    private static final List<Method> applyMethods = Arrays.stream(Auction.class.getMethods()).filter(m -> m.getName().contains("onEvent")).collect(Collectors.toList());
-    private UUID auctioneerId;
-    private UUID itemId;
-    private UUID currentWinnerId;
+    private final long id;
+    private long auctioneerId;
+    private long itemId;
+    private long currentWinnerId;
     private double currentWinningBid = 0;
     private AuctionState state;
 
-    public Auction(UUID id) {
+    public Auction(long id) {
         this.id = id;
     }
 
-    public Event handle(Command c) throws Exception {
-        for (Method m : handleMethods)
-            if (m.getParameterTypes()[0].equals(c.getClass()))
-                return (Event) m.invoke(this, c);
-
-        return null;
+    public Event handle(Command command) throws Exception {
+        return command.accept(this);
     }
 
-    public void apply(Event e) throws Exception {
-        for (Method m : applyMethods)
-            if (m.getParameterTypes()[0].equals(e.getClass()))
-                m.invoke(this, e);
+    public void apply(Event event) {
+
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public AuctionFinished onCommand(FinishAuction cmd) throws Exception {
+
+        if (state == AuctionState.CREATED) {
+            throw new AuctionNotStartedException("Auction hasn't started");
+        }
+
+        if (state == AuctionState.CANCELLED) {
+            throw new AuctionCancelledException("Auction has already been cancelled");
+        }
+
+        if (state == AuctionState.ENDED) {
+            throw new AuctionEndedException("Auction has already ended");
+        }
+
+        return new AuctionFinished(cmd.getAuctionId(), cmd.getTimestamp());
     }
 
     public AuctionCancelled onCommand(CancelAuction cmd) throws Exception {
@@ -63,21 +72,8 @@ public class Auction {
         return new AuctionCreated(cmd.getAuctionId(), cmd.getTimestamp(), cmd.getAuctioneerId(), cmd.getItemId());
     }
 
-    public AuctionEnded onCommand(EndAuction cmd) throws Exception {
-
-        if (state == AuctionState.CREATED) {
-            throw new AuctionNotStartedException("Auction hasn't started");
-        }
-
-        if (state == AuctionState.CANCELLED) {
-            throw new AuctionCancelledException("Auction has already been cancelled");
-        }
-
-        if (state == AuctionState.ENDED) {
-            throw new AuctionEndedException("Auction has already ended");
-        }
-
-        return new AuctionEnded(cmd.getAuctionId(), cmd.getTimestamp());
+    public void onEvent(AuctionFinished evt) {
+        state = AuctionState.ENDED;
     }
 
     public BidPlaced onCommand(PlaceBid cmd) throws Exception {
@@ -126,8 +122,11 @@ public class Auction {
         state = AuctionState.CREATED;
     }
 
-    public void onEvent(AuctionEnded evt) {
-        state = AuctionState.ENDED;
+    public enum AuctionState {
+        CREATED,
+        STARTED,
+        CANCELLED,
+        ENDED
     }
 
     public void onEvent(BidPlaced evt) {
@@ -141,10 +140,4 @@ public class Auction {
         state = AuctionState.STARTED;
     }
 
-    public enum AuctionState {
-        CREATED,
-        STARTED,
-        CANCELLED,
-        ENDED
-    }
 }

@@ -1,31 +1,28 @@
 package domain.auction.events;
 
-import org.bson.Document;
-
-import java.util.UUID;
+import domain.auction.Auction;
 
 public class AuctionCreated extends Event {
-    private final UUID auctioneerId;
-    private final UUID itemId;
+    private final long auctioneerId;
+    private final long itemId;
 
-    public AuctionCreated(long auctionId, long timestamp, UUID auctioneerId, UUID itemId) {
+    public AuctionCreated(long auctionId, long timestamp, long auctioneerId, long itemId) {
         super(auctionId, timestamp);
         this.auctioneerId = auctioneerId;
         this.itemId = itemId;
     }
 
-    public final UUID getAuctioneerId() {
+    public final long getAuctioneerId() {
         return auctioneerId;
     }
 
-    public final UUID getItemId() {
+    public final long getItemId() {
         return itemId;
     }
 
+
     @Override
-    public Document getEventDataDocument() {
-        return new Document()
-                .append("auctioneerId", auctioneerId.toString())
-                .append("itemId", itemId.toString());
+    public void accept(Auction auction) {
+        auction.onEvent(this);
     }
 }

@@ -3,12 +3,12 @@ package messaging.disruptor;
 import com.lmax.disruptor.BusySpinWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
-import command.service.AuctionService;
-import command.service.AuctionServiceImpl;
-import domain.Repository;
+import domain.auction.AuctionService;
+import domain.auction.AuctionServiceImpl;
+import domain.auction.repository.Repository;
 import messaging.CommandBase;
 import messaging.CommandDispatcher;
-import messaging.handlers.CommandProcessor;
+import messaging.handlers.CommandParser;
 
 import java.util.concurrent.Executors;
 
@@ -22,7 +22,7 @@ public class DisruptorCommandDispatcher implements CommandDispatcher {
         this.repository = repository;
         auctionService = new AuctionServiceImpl(repository);
         disruptor = new Disruptor<>(CommandBase::new, bufferSize, Executors.defaultThreadFactory(), ProducerType.MULTI, new BusySpinWaitStrategy());
-        disruptor.handleEventsWith(new CommandProcessor(repository, auctionService));
+        disruptor.handleEventsWith(new CommandParser(repository, auctionService));
         disruptor.start();
     }
 

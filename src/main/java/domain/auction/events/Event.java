@@ -1,5 +1,7 @@
 package domain.auction.events;
 
+import domain.auction.Auction;
+
 public abstract class Event {
     private final long auctionId;
     private final long timestampMillis;
@@ -17,9 +19,5 @@ public abstract class Event {
         return timestampMillis;
     }
 
-    protected abstract String Serialize();
-
-    public String GetSerialized() {
-        return String.format("%d|%s", timestampMillis, Serialize());
-    }
+    public abstract void accept(Auction auction);
 }

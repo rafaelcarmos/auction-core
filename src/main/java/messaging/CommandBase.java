@@ -5,20 +5,28 @@ import domain.auction.commands.Command;
 public class CommandBase {
 
     private long sequence;
-    private long timestamp;
-    private Command command;
     private String rawMessage;
+    private Command command;
 
     public CommandBase() {
 
     }
 
-    public long getTimestamp() {
-        return timestamp;
+
+    public long getSequence() {
+        return sequence;
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+    public void setSequence(long sequence) {
+        this.sequence = sequence;
+    }
+
+    public String getRawMessage() {
+        return rawMessage;
+    }
+
+    public void setRawMessage(String rawMessage) {
+        this.rawMessage = rawMessage;
     }
 
     public Command getCommand() {
@@ -29,11 +37,4 @@ public class CommandBase {
         this.command = command;
     }
 
-    public String getRawMessage() {
-        return rawMessage;
-    }
-
-    public void setRawMessage(String rawMessage) {
-        this.rawMessage = rawMessage;
-    }
 }

@@ -2,9 +2,9 @@ package domain.auction.events;
 
 import domain.auction.Auction;
 
-public class AuctionCancelled extends Event {
+public class AuctionFinished extends Event {
 
-    public AuctionCancelled(long auctionId, long timestamp) {
+    public AuctionFinished(long auctionId, long timestamp) {
         super(auctionId, timestamp);
     }
 
@@ -12,5 +12,4 @@ public class AuctionCancelled extends Event {
     public void accept(Auction auction) {
         auction.onEvent(this);
     }
-
 }
