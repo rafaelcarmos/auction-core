@@ -1,19 +1,13 @@
 package messaging.handlers;
 
 import com.lmax.disruptor.EventHandler;
-import domain.auction.AuctionService;
 import domain.auction.commands.Command;
-import domain.auction.repository.Repository;
 import messaging.CommandBase;
 
 public class CommandParser implements EventHandler<CommandBase> {
 
-    private final Repository repository;
-    private final AuctionService auctionService;
+    public CommandParser() {
 
-    public CommandParser(Repository repository, AuctionService auctionService) {
-        this.repository = repository;
-        this.auctionService = auctionService;
     }
 
     @Override
@@ -22,11 +16,11 @@ public class CommandParser implements EventHandler<CommandBase> {
 
             commandBase.setSequence(sequence);
             String csv = commandBase.getRawMessage();
+            long timestamp = System.currentTimeMillis();
 
-            Command command = Command.fromCSV(csv, sequence);
+            Command command = Command.fromCSV(csv, sequence, timestamp);
 
             commandBase.setCommand(command);
-            auctionService.processCommand(command);
 
         } catch (Exception ex) {
             ex.printStackTrace();

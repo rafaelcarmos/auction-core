@@ -13,36 +13,49 @@ public abstract class Command {
         this.timestamp = timestamp;
     }
 
-    public final static Command fromCSV(String csv, long sequence) {
+    public final static Command fromCSV(String csv, long sequence, long timestamp) {
 
         String[] fields = csv.split(";");
 
         CommandType commandType = CommandType.fromInt(Integer.parseInt(fields[0]));
+
+        int currentIndex = 1;
+
+        if (timestamp == -1) {
+            timestamp = Long.parseLong(fields[currentIndex++]);
+        }
+
 
         Command command = null;
 
         switch (commandType) {
 
             case CREATE_AUCTION:
-                command = new CreateAuction(sequence, -1, -1, -1);
+                long auctioneerId = Long.parseLong(fields[currentIndex++]);
+                long itemId = Long.parseLong(fields[currentIndex++]);
+                command = new CreateAuction(sequence, timestamp, auctioneerId, itemId);
                 break;
+
             case CANCEL_AUCTION:
-                long auctionIdCancel = Long.parseLong(fields[1]);
-                command = new CancelAuction(auctionIdCancel, -1);
+                long auctionIdCancel = Long.parseLong(fields[currentIndex++]);
+                command = new CancelAuction(auctionIdCancel, timestamp);
                 break;
+
             case START_AUCTION:
-                long auctionIdStart = Long.parseLong(fields[1]);
-                command = new StartAuction(auctionIdStart, -1);
+                long auctionIdStart = Long.parseLong(fields[currentIndex++]);
+                command = new StartAuction(auctionIdStart, timestamp);
                 break;
+
             case FINISH_AUCTION:
-                long auctionIdFinish = Long.parseLong(fields[1]);
-                command = new FinishAuction(auctionIdFinish, -1);
+                long auctionIdFinish = Long.parseLong(fields[currentIndex++]);
+                command = new FinishAuction(auctionIdFinish, timestamp);
                 break;
+
             case PLACE_BID:
-                long auctionIdPlaceBid = Long.parseLong(fields[1]);
-                long bidderId = Long.parseLong(fields[2]);
-                double bidAmount = Long.parseLong(fields[3]);
-                command = new PlaceBid(auctionIdPlaceBid, -1, bidderId, bidAmount);
+                long auctionIdPlaceBid = Long.parseLong(fields[currentIndex++]);
+                long bidderId = Long.parseLong(fields[currentIndex++]);
+                double bidAmount = Long.parseLong(fields[currentIndex++]);
+                command = new PlaceBid(auctionIdPlaceBid, timestamp, bidderId, bidAmount);
                 break;
         }
 

@@ -4,25 +4,24 @@ import com.lmax.disruptor.BusySpinWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import domain.auction.AuctionService;
-import domain.auction.AuctionServiceImpl;
-import domain.auction.repository.Repository;
 import messaging.CommandBase;
 import messaging.CommandDispatcher;
+import messaging.handlers.CommandJournaler;
 import messaging.handlers.CommandParser;
+import messaging.handlers.CommandProcessor;
 
 import java.util.concurrent.Executors;
 
 public class DisruptorCommandDispatcher implements CommandDispatcher {
 
     private final Disruptor<CommandBase> disruptor;
-    private final Repository repository;
     private final AuctionService auctionService;
 
-    public DisruptorCommandDispatcher(Repository repository, int bufferSize) {
-        this.repository = repository;
-        auctionService = new AuctionServiceImpl(repository);
+    public DisruptorCommandDispatcher(AuctionService auctionService, int bufferSize) throws Exception {
+
+        this.auctionService = auctionService;
         disruptor = new Disruptor<>(CommandBase::new, bufferSize, Executors.defaultThreadFactory(), ProducerType.MULTI, new BusySpinWaitStrategy());
-        disruptor.handleEventsWith(new CommandParser(repository, auctionService));
+        disruptor.handleEventsWith(new CommandJournaler(), new CommandParser()).then(new CommandProcessor(auctionService));
         disruptor.start();
     }
 
@@ -37,6 +36,6 @@ public class DisruptorCommandDispatcher implements CommandDispatcher {
     @Override
     public void shutdown() {
         disruptor.shutdown();
-        repository.close();
+        auctionService.close();
     }
 }

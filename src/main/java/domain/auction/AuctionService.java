@@ -8,4 +8,6 @@ public interface AuctionService {
 
     void replayHistory() throws Exception;
 
+    void close();
+
 }

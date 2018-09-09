@@ -18,6 +18,7 @@ public class AuctionServiceImpl implements AuctionService {
     public void processCommand(Command command) throws Exception {
 
         Auction auction;
+
         if (command instanceof CreateAuction)
             auction = repository.createAndGetAuction(command.getAuctionId());
         else
@@ -32,5 +33,10 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public void replayHistory() {
 
+    }
+
+    @Override
+    public void close() {
+        repository.close();
     }
 }
