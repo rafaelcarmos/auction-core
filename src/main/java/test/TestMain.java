@@ -7,7 +7,8 @@ import domain.auction.service.AuctionService;
 import domain.auction.service.AuctionServiceImpl;
 import messaging.CommandDispatcher;
 import messaging.CommandDispatcherFactory;
-import messaging.dispatchers.DisruptorCommandDispatcher;
+import messaging.dispatchers.ABQCommandDispatcher;
+import messaging.dispatchers.SingleThreadedCommandDispatcher;
 
 import java.util.UUID;
 
@@ -15,9 +16,9 @@ public class TestMain {
 
     public static void main(String args[]) {
 
-        int size = 10000000;
+        int size = 5000000;
         int iterations = 5;
-        int bufferSize = (int) Math.pow(2d, 20d);
+        int bufferSize = (int) Math.pow(2d, 21d);
 
         CommandDispatcher dispatcher = null;
         Repository repository = new InMemoryRepository();
@@ -34,7 +35,7 @@ public class TestMain {
             if (args.length > 2)
                 dispatcher = CommandDispatcherFactory.getDispatcher(args[2], auctionService, bufferSize);
             else
-                dispatcher = new DisruptorCommandDispatcher(auctionService, bufferSize);
+                dispatcher = new ABQCommandDispatcher(auctionService, bufferSize);
 
 
             UUID auctionId = UUID.randomUUID();
@@ -52,18 +53,19 @@ public class TestMain {
 
             for (int iteration = 0; iteration < iterations; iteration++) {
 
-                System.gc();
-
                 long startNano = System.nanoTime();
 
                 for (int commandCount = 0; commandCount < size; commandCount++)
                     dispatcher.processCommand(placeBid);
 
                 String callbackCommand = "CALLBACK_COMMAND;" + auctionId;
-                dispatcher.processCommand(callbackCommand);
 
-                synchronized (callbackCommand) {
-                    callbackCommand.wait();
+                if (!(dispatcher instanceof SingleThreadedCommandDispatcher)) {
+                    dispatcher.processCommand(callbackCommand);
+
+                    synchronized (callbackCommand) {
+                        callbackCommand.wait();
+                    }
                 }
 
                 long endNano = System.nanoTime();
