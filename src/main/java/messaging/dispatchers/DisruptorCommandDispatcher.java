@@ -17,8 +17,8 @@ public class DisruptorCommandDispatcher implements CommandDispatcher {
 
     private final EventTranslatorOneArg<CommandBase, String> translator = new EventTranslatorOneArg<CommandBase, String>() {
         @Override
-        public void translateTo(CommandBase event, long sequence, String arg0) {
-            event.setRawMessage(arg0);
+        public void translateTo(CommandBase event, long sequence, String rawMessage) {
+            event.setRawMessage(rawMessage);
         }
     };
     private final Disruptor<CommandBase> disruptor;

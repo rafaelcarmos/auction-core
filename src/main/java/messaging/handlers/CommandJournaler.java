@@ -5,27 +5,44 @@ import messaging.CommandBase;
 
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class CommandJournaler implements EventHandler<CommandBase> {
 
-    RandomAccessFile raf;
+    private final int BUFFER_SIZE = 1024;
+
+    private RandomAccessFile raf;
+    private ByteBuffer buffer;
 
     public CommandJournaler() throws FileNotFoundException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-        raf = new RandomAccessFile("command_journal_" + LocalDateTime.now().format(formatter), "rw");
+
+        buffer = ByteBuffer.allocate(BUFFER_SIZE);
+        raf = new RandomAccessFile("randomAccessFileTest" + LocalDateTime.now().toString(), "rw");
     }
 
     @Override
     public void onEvent(CommandBase commandBase, long sequence, boolean endOfBatch) {
         try {
 
-            raf.writeBytes(commandBase.getRawMessage() + System.lineSeparator());
+            byte[] msg = (commandBase.getRawMessage() + System.lineSeparator()).getBytes();
+
+            if (msg.length >= buffer.remaining())
+                writeBytes();
+
+            buffer.put(msg);
+
+            if (endOfBatch)
+                writeBytes();
 
         } catch (Exception ex) {
             ex.printStackTrace();
             System.out.println(commandBase.getRawMessage());
         }
+    }
+
+    private void writeBytes() throws Exception {
+        //raf.write(buffer.array());
+        buffer.clear();
     }
 }

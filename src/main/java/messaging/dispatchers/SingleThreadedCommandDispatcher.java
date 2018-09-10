@@ -3,20 +3,20 @@ package messaging.dispatchers;
 import domain.auction.service.AuctionService;
 import messaging.CommandBase;
 import messaging.CommandDispatcher;
-import messaging.handlers.SingleThreadedCommandHandler;
+//import messaging.handlers.SingleThreadedCommandHandler;
 
 public class SingleThreadedCommandDispatcher implements CommandDispatcher {
 
 
     private long sequence = 0;
     private AuctionService auctionService;
-    private SingleThreadedCommandHandler handler;
+    //private SingleThreadedCommandHandler handler;
 
-    public SingleThreadedCommandDispatcher(AuctionService auctionService, int queueSize) throws Exception {
+    public SingleThreadedCommandDispatcher(AuctionService auctionService, int queueSize) {
 
         this.auctionService = auctionService;
 
-        handler = new SingleThreadedCommandHandler(auctionService);
+        //handler = new SingleThreadedCommandHandler(auctionService);
     }
 
     @Override
@@ -24,7 +24,7 @@ public class SingleThreadedCommandDispatcher implements CommandDispatcher {
 
         CommandBase command = new CommandBase();
         command.setRawMessage(rawMessage);
-        handler.onEvent(command, sequence, false);
+        //handler.onEvent(command, sequence, false);
         sequence++;
     }
 

@@ -7,7 +7,7 @@ import domain.auction.service.AuctionService;
 import domain.auction.service.AuctionServiceImpl;
 import messaging.CommandDispatcher;
 import messaging.CommandDispatcherFactory;
-import messaging.dispatchers.ABQCommandDispatcher;
+import messaging.dispatchers.DisruptorCommandDispatcher;
 import messaging.dispatchers.SingleThreadedCommandDispatcher;
 
 import java.util.UUID;
@@ -16,7 +16,7 @@ public class TestMain {
 
     public static void main(String args[]) {
 
-        int size = 5000000;
+        int size = 1000000;
         int iterations = 5;
         int bufferSize = (int) Math.pow(2d, 21d);
 
@@ -35,7 +35,7 @@ public class TestMain {
             if (args.length > 2)
                 dispatcher = CommandDispatcherFactory.getDispatcher(args[2], auctionService, bufferSize);
             else
-                dispatcher = new ABQCommandDispatcher(auctionService, bufferSize);
+                dispatcher = new DisruptorCommandDispatcher(auctionService, bufferSize);
 
 
             UUID auctionId = UUID.randomUUID();
@@ -52,6 +52,8 @@ public class TestMain {
             cols.addLine("#", "Type", "Nano", "Throughput Msgs/second");
 
             for (int iteration = 0; iteration < iterations; iteration++) {
+
+                System.gc();
 
                 long startNano = System.nanoTime();
 

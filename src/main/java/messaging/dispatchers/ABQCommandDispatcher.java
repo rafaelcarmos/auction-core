@@ -59,10 +59,13 @@ public class ABQCommandDispatcher implements CommandDispatcher {
 
             try {
 
-                CommandBase cmd = mainInputQueue.take();
+                while (!mainInputQueue.isEmpty()) {
 
-                journalerInputQueue.put(cmd);
-                parserInputQueue.put(cmd);
+                    CommandBase cmd = mainInputQueue.take();
+
+                    journalerInputQueue.put(cmd);
+                    parserInputQueue.put(cmd);
+                }
 
             } catch (Exception ex) {
 
@@ -76,11 +79,14 @@ public class ABQCommandDispatcher implements CommandDispatcher {
 
             try {
 
-                CommandBase cmd = journalerInputQueue.take();
+                while (!journalerInputQueue.isEmpty()) {
 
-                journaler.onEvent(cmd, -1, false);
+                    CommandBase cmd = journalerInputQueue.take();
 
-                journalerOutputQueue.put(cmd);
+                    journaler.onEvent(cmd, -1, false);
+
+                    journalerOutputQueue.put(cmd);
+                }
 
             } catch (Exception ex) {
 
@@ -94,11 +100,14 @@ public class ABQCommandDispatcher implements CommandDispatcher {
 
             try {
 
-                CommandBase cmd = parserInputQueue.take();
+                while (!parserInputQueue.isEmpty()) {
 
-                parser.onEvent(cmd, -1, false);
+                    CommandBase cmd = parserInputQueue.take();
 
-                parserOutputQueue.put(cmd);
+                    parser.onEvent(cmd, -1, false);
+
+                    parserOutputQueue.put(cmd);
+                }
 
             } catch (Exception ex) {
 
