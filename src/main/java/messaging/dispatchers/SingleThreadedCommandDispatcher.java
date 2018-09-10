@@ -1,7 +1,6 @@
 package messaging.dispatchers;
 
-import domain.auction.repository.Repository;
-import domain.auction.service.AuctionServiceImpl;
+import domain.auction.service.AuctionService;
 import messaging.CommandBase;
 import messaging.CommandDispatcher;
 import messaging.handlers.CommandJournaler;
@@ -12,19 +11,22 @@ public class SingleThreadedCommandDispatcher implements CommandDispatcher {
 
 
     private long sequence = 0;
+    private AuctionService auctionService;
     private CommandJournaler journaler;
     private CommandParser parser;
     private CommandProcessor processor;
 
-    public SingleThreadedCommandDispatcher(Repository repository, int queueSize) throws Exception {
+    public SingleThreadedCommandDispatcher(AuctionService auctionService, int queueSize) throws Exception {
 
+        this.auctionService = auctionService;
         this.journaler = new CommandJournaler();
         this.parser = new CommandParser();
-        this.processor = new CommandProcessor(new AuctionServiceImpl(repository));
+        this.processor = new CommandProcessor(auctionService);
     }
 
     @Override
-    public void processCommand(String rawMessage) throws Exception {
+    public void processCommand(String rawMessage) {
+
         CommandBase command = new CommandBase();
         command.setRawMessage(rawMessage);
 

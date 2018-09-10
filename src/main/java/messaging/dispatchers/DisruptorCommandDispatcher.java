@@ -1,6 +1,6 @@
 package messaging.dispatchers;
 
-import com.lmax.disruptor.BusySpinWaitStrategy;
+import com.lmax.disruptor.BlockingWaitStrategy;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import domain.auction.service.AuctionService;
@@ -20,7 +20,7 @@ public class DisruptorCommandDispatcher implements CommandDispatcher {
     public DisruptorCommandDispatcher(AuctionService auctionService, int bufferSize) throws Exception {
 
         this.auctionService = auctionService;
-        disruptor = new Disruptor<>(CommandBase::new, bufferSize, Executors.defaultThreadFactory(), ProducerType.SINGLE, new BusySpinWaitStrategy());
+        disruptor = new Disruptor<>(CommandBase::new, bufferSize, Executors.defaultThreadFactory(), ProducerType.SINGLE, new BlockingWaitStrategy());
         disruptor.handleEventsWith(new CommandJournaler(), new CommandParser()).then(new CommandProcessor(auctionService));
         disruptor.start();
     }

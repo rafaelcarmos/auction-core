@@ -20,7 +20,7 @@ public class CommandJournaler implements EventHandler<CommandBase> {
     public void onEvent(CommandBase commandBase, long sequence, boolean endOfBatch) {
         try {
 
-            //raf.writeBytes(commandBase.getRawMessage() + System.lineSeparator());
+            raf.writeBytes(commandBase.getRawMessage() + System.lineSeparator());
 
         } catch (Exception ex) {
             ex.printStackTrace();

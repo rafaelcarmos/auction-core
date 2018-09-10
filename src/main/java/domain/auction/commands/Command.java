@@ -2,6 +2,7 @@ package domain.auction.commands;
 
 import domain.auction.Auction;
 import domain.auction.events.Event;
+import test.CallbackCommand;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,14 +22,16 @@ public abstract class Command {
         String[] fields = csv.split(";");
 
         int currentIndex = 0;
+        UUID auctionId = null;
 
         CommandType commandType = CommandType.valueOf(fields[currentIndex++]);
 
-        if (timestamp == null) {
-            timestamp = LocalDateTime.parse(fields[currentIndex++]);
-        }
+        if (commandType != CommandType.CALLBACK_COMMAND) {
+            if (timestamp == null)
+                timestamp = LocalDateTime.parse(fields[currentIndex++]);
 
-        UUID auctionId = UUID.fromString(fields[currentIndex++]);
+            auctionId = UUID.fromString(fields[currentIndex++]);
+        }
 
         Command command = null;
 
@@ -56,6 +59,13 @@ public abstract class Command {
                 long bidderId = Long.parseLong(fields[currentIndex++]);
                 double bidAmount = Double.parseDouble(fields[currentIndex++]);
                 command = new PlaceBid(auctionId, timestamp, bidderId, bidAmount);
+                break;
+
+            case CALLBACK_COMMAND:
+                synchronized (csv) {
+                    csv.notifyAll();
+                }
+                command = new CallbackCommand(auctionId, timestamp);
                 break;
         }
 

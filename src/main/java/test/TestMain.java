@@ -15,9 +15,9 @@ public class TestMain {
 
     public static void main(String args[]) {
 
-        int size = 1000000;
+        int size = 10000000;
         int iterations = 5;
-        int bufferSize = (int) Math.pow(2d, 12d);
+        int bufferSize = (int) Math.pow(2d, 20d);
 
         CommandDispatcher dispatcher = null;
         Repository repository = new InMemoryRepository();
@@ -52,10 +52,19 @@ public class TestMain {
 
             for (int iteration = 0; iteration < iterations; iteration++) {
 
+                System.gc();
+
                 long startNano = System.nanoTime();
 
                 for (int commandCount = 0; commandCount < size; commandCount++)
                     dispatcher.processCommand(placeBid);
+
+                String callbackCommand = "CALLBACK_COMMAND;" + auctionId;
+                dispatcher.processCommand(callbackCommand);
+
+                synchronized (callbackCommand) {
+                    callbackCommand.wait();
+                }
 
                 long endNano = System.nanoTime();
                 long elapsedNano = endNano - startNano;

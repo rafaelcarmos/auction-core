@@ -3,48 +3,122 @@ package messaging.dispatchers;
 import domain.auction.service.AuctionService;
 import messaging.CommandBase;
 import messaging.CommandDispatcher;
+import messaging.handlers.CommandJournaler;
 import messaging.handlers.CommandParser;
-import test.ShutdownCommand;
+import messaging.handlers.CommandProcessor;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ABQCommandDispatcher implements CommandDispatcher {
 
-    private final ArrayBlockingQueue<CommandBase> queue;
+    private final ArrayBlockingQueue<CommandBase> mainInputQueue;
+    private final ArrayBlockingQueue<CommandBase> journalerInputQueue;
+    private final ArrayBlockingQueue<CommandBase> parserInputQueue;
+    private final ArrayBlockingQueue<CommandBase> journalerOutputQueue;
+    private final ArrayBlockingQueue<CommandBase> parserOutputQueue;
+    private final ExecutorService executor;
     private final AuctionService auctionService;
-    private Thread consumer;
+    private final CommandJournaler journaler;
+    private final CommandParser parser;
+    private final CommandProcessor processor;
     private boolean stopped = false;
 
-    public ABQCommandDispatcher(AuctionService auctionService, int queueSize) {
+    public ABQCommandDispatcher(AuctionService auctionService, int queueSize) throws Exception {
+
+        this.executor = Executors.newCachedThreadPool();
         this.auctionService = auctionService;
-        queue = new ArrayBlockingQueue<>(queueSize);
-        consumer = Executors.defaultThreadFactory().newThread(this::consumeQueue);
-        consumer.start();
+
+        journaler = new CommandJournaler();
+        parser = new CommandParser();
+        processor = new CommandProcessor(auctionService);
+
+        mainInputQueue = new ArrayBlockingQueue<>(queueSize);
+        journalerInputQueue = new ArrayBlockingQueue<>(queueSize);
+        parserInputQueue = new ArrayBlockingQueue<>(queueSize);
+        journalerOutputQueue = new ArrayBlockingQueue<>(queueSize);
+        parserOutputQueue = new ArrayBlockingQueue<>(queueSize);
+
+        executor.submit(this::consumeMainInputQueue);
+        executor.submit(this::consumeJournalerInputQueue);
+        executor.submit(this::consumeParserInputQueue);
+        executor.submit(this::consumeParserAndJournalerOuputQueue);
     }
 
     @Override
     public void processCommand(String rawMessage) throws Exception {
         CommandBase cmd = new CommandBase();
         cmd.setRawMessage(rawMessage);
-        queue.put(cmd);
+        mainInputQueue.put(cmd);
     }
 
-    private void consumeQueue() {
-        CommandParser processor = new CommandParser();
-        CommandBase cmd;
+    private void consumeMainInputQueue() {
 
         while (!stopped) {
+
             try {
-                cmd = queue.take();
 
-                //POISON MESSAGE, STOP CONSUMING
-                if (cmd.getCommand() instanceof ShutdownCommand)
-                    return;
+                CommandBase cmd = mainInputQueue.take();
 
-                if (cmd != null) {
-                    processor.onEvent(cmd, 0, false);
-                }
+                journalerInputQueue.put(cmd);
+                parserInputQueue.put(cmd);
+
+            } catch (Exception ex) {
+
+            }
+        }
+    }
+
+    private void consumeJournalerInputQueue() {
+
+        while (!stopped) {
+
+            try {
+
+                CommandBase cmd = journalerInputQueue.take();
+
+                journaler.onEvent(cmd, -1, false);
+
+                journalerOutputQueue.put(cmd);
+
+            } catch (Exception ex) {
+
+            }
+        }
+    }
+
+    private void consumeParserInputQueue() {
+
+        while (!stopped) {
+
+            try {
+
+                CommandBase cmd = parserInputQueue.take();
+
+                parser.onEvent(cmd, -1, false);
+
+                parserOutputQueue.put(cmd);
+
+            } catch (Exception ex) {
+
+            }
+        }
+    }
+
+    private void consumeParserAndJournalerOuputQueue() {
+
+        while (!stopped) {
+
+            try {
+
+                CommandBase cmdJournaler = journalerOutputQueue.take();
+                CommandBase cmdParser = parserOutputQueue.take();
+
+                if (cmdJournaler != cmdParser)
+                    throw new Exception("Unsynchronized queues");
+
+                processor.onEvent(cmdJournaler, -1, false);
 
             } catch (Exception ex) {
 
@@ -54,17 +128,14 @@ public class ABQCommandDispatcher implements CommandDispatcher {
 
     @Override
     public void shutdown() {
+
         stopped = true;
+
         try {
 
-            CommandBase poisonMessage = new CommandBase();
-            poisonMessage.setCommand(new ShutdownCommand(null, null));
-
-            //Kill consumer thread
-            queue.put(poisonMessage);
-
-            consumer.join();
+            executor.shutdownNow();
             auctionService.close();
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }

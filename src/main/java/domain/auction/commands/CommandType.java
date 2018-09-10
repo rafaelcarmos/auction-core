@@ -1,11 +1,13 @@
 package domain.auction.commands;
 
 public enum CommandType {
+
     CREATE_AUCTION,
     CANCEL_AUCTION,
     START_AUCTION,
     FINISH_AUCTION,
-    PLACE_BID;
+    PLACE_BID,
+    CALLBACK_COMMAND;
 
     private static CommandType[] values = CommandType.values();
 

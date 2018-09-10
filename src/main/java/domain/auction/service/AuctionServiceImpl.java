@@ -25,7 +25,11 @@ public class AuctionServiceImpl implements AuctionService {
         else
             auction = repository.getAuction(command.getAuctionId());
 
+        if (auction == null)
+            return;
+
         Event event = auction.handle(command);
+
         if (event != null) {
             auction.apply(event);
         }
