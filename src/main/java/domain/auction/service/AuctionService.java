@@ -1,4 +1,4 @@
-package domain.auction;
+package domain.auction.service;
 
 import domain.auction.commands.Command;
 

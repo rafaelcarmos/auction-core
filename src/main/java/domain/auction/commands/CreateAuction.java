@@ -3,11 +3,14 @@ package domain.auction.commands;
 import domain.auction.Auction;
 import domain.auction.events.Event;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 public class CreateAuction extends Command {
     private final long auctioneerId;
     private final long itemId;
 
-    public CreateAuction(long auctionId, long timestamp, long auctioneerId, long itemId) {
+    public CreateAuction(UUID auctionId, LocalDateTime timestamp, long auctioneerId, long itemId) {
         super(auctionId, timestamp);
         this.auctioneerId = auctioneerId;
         this.itemId = itemId;

@@ -2,9 +2,12 @@ package domain.auction.events;
 
 import domain.auction.Auction;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 public class AuctionFinished extends Event {
 
-    public AuctionFinished(long auctionId, long timestamp) {
+    public AuctionFinished(UUID auctionId, LocalDateTime timestamp) {
         super(auctionId, timestamp);
     }
 

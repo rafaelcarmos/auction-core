@@ -1,7 +1,7 @@
 package messaging.handlers;
 
 import com.lmax.disruptor.EventHandler;
-import domain.auction.AuctionService;
+import domain.auction.service.AuctionService;
 import messaging.CommandBase;
 
 public class CommandProcessor implements EventHandler<CommandBase> {

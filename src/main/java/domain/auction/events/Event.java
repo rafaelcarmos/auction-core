@@ -2,21 +2,24 @@ package domain.auction.events;
 
 import domain.auction.Auction;
 
-public abstract class Event {
-    private final long auctionId;
-    private final long timestampMillis;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
-    public Event(long auctionId, long timestampMillis) {
+public abstract class Event {
+    private final UUID auctionId;
+    private final LocalDateTime timestamp;
+
+    public Event(UUID auctionId, LocalDateTime timestamp) {
         this.auctionId = auctionId;
-        this.timestampMillis = timestampMillis;
+        this.timestamp = timestamp;
     }
 
-    public final long getAuctionId() {
+    public final UUID getAuctionId() {
         return auctionId;
     }
 
-    public final long getTimestampMillis() {
-        return timestampMillis;
+    public final LocalDateTime getTimestamp() {
+        return timestamp;
     }
 
     public abstract void accept(Auction auction);

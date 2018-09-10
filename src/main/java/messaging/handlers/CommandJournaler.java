@@ -5,6 +5,7 @@ import messaging.CommandBase;
 
 import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
+import java.time.LocalDateTime;
 
 public class CommandJournaler implements EventHandler<CommandBase> {
 
@@ -12,14 +13,14 @@ public class CommandJournaler implements EventHandler<CommandBase> {
 
     public CommandJournaler() throws FileNotFoundException {
 
-        raf = new RandomAccessFile("randomAccessFileTest", "rw");
+        raf = new RandomAccessFile("randomAccessFileTest" + LocalDateTime.now().toString(), "rw");
     }
 
     @Override
     public void onEvent(CommandBase commandBase, long sequence, boolean endOfBatch) {
         try {
 
-            raf.writeBytes(commandBase.getRawMessage());
+            //raf.writeBytes(commandBase.getRawMessage() + System.lineSeparator());
 
         } catch (Exception ex) {
             ex.printStackTrace();

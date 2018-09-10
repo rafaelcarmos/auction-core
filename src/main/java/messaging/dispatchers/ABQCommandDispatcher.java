@@ -1,8 +1,6 @@
-package messaging.abq;
+package messaging.dispatchers;
 
-import domain.auction.AuctionService;
-import domain.auction.AuctionServiceImpl;
-import domain.auction.repository.Repository;
+import domain.auction.service.AuctionService;
 import messaging.CommandBase;
 import messaging.CommandDispatcher;
 import messaging.handlers.CommandParser;
@@ -14,14 +12,12 @@ import java.util.concurrent.Executors;
 public class ABQCommandDispatcher implements CommandDispatcher {
 
     private final ArrayBlockingQueue<CommandBase> queue;
-    private final Repository repository;
     private final AuctionService auctionService;
     private Thread consumer;
     private boolean stopped = false;
 
-    public ABQCommandDispatcher(Repository repository, int queueSize) {
-        this.repository = repository;
-        auctionService = new AuctionServiceImpl(repository);
+    public ABQCommandDispatcher(AuctionService auctionService, int queueSize) {
+        this.auctionService = auctionService;
         queue = new ArrayBlockingQueue<>(queueSize);
         consumer = Executors.defaultThreadFactory().newThread(this::consumeQueue);
         consumer.start();
@@ -35,7 +31,7 @@ public class ABQCommandDispatcher implements CommandDispatcher {
     }
 
     private void consumeQueue() {
-        CommandParser processor = new CommandParser(repository, auctionService);
+        CommandParser processor = new CommandParser();
         CommandBase cmd;
 
         while (!stopped) {
@@ -62,13 +58,13 @@ public class ABQCommandDispatcher implements CommandDispatcher {
         try {
 
             CommandBase poisonMessage = new CommandBase();
-            poisonMessage.setCommand(new ShutdownCommand(-1, -1));
+            poisonMessage.setCommand(new ShutdownCommand(null, null));
 
             //Kill consumer thread
             queue.put(poisonMessage);
 
             consumer.join();
-            repository.close();
+            auctionService.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

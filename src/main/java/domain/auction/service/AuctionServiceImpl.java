@@ -1,5 +1,6 @@
-package domain.auction;
+package domain.auction.service;
 
+import domain.auction.Auction;
 import domain.auction.commands.Command;
 import domain.auction.commands.CreateAuction;
 import domain.auction.events.Event;

@@ -4,9 +4,12 @@ import domain.auction.Auction;
 import domain.auction.commands.Command;
 import domain.auction.events.Event;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 public class ShutdownCommand extends Command {
 
-    public ShutdownCommand(long auctionId, long timestamp) {
+    public ShutdownCommand(UUID auctionId, LocalDateTime timestamp) {
         super(auctionId, timestamp);
     }
 

@@ -3,28 +3,32 @@ package domain.auction.commands;
 import domain.auction.Auction;
 import domain.auction.events.Event;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 public abstract class Command {
 
-    private final long auctionId;
-    private final long timestamp;
+    private final UUID auctionId;
+    private final LocalDateTime timestamp;
 
-    public Command(long auctionId, long timestamp) {
+    public Command(UUID auctionId, LocalDateTime timestamp) {
         this.auctionId = auctionId;
         this.timestamp = timestamp;
     }
 
-    public final static Command fromCSV(String csv, long sequence, long timestamp) {
+    public final static Command fromCSV(String csv, LocalDateTime timestamp) {
 
         String[] fields = csv.split(";");
 
-        CommandType commandType = CommandType.fromInt(Integer.parseInt(fields[0]));
+        int currentIndex = 0;
 
-        int currentIndex = 1;
+        CommandType commandType = CommandType.valueOf(fields[currentIndex++]);
 
-        if (timestamp == -1) {
-            timestamp = Long.parseLong(fields[currentIndex++]);
+        if (timestamp == null) {
+            timestamp = LocalDateTime.parse(fields[currentIndex++]);
         }
 
+        UUID auctionId = UUID.fromString(fields[currentIndex++]);
 
         Command command = null;
 
@@ -33,40 +37,36 @@ public abstract class Command {
             case CREATE_AUCTION:
                 long auctioneerId = Long.parseLong(fields[currentIndex++]);
                 long itemId = Long.parseLong(fields[currentIndex++]);
-                command = new CreateAuction(sequence, timestamp, auctioneerId, itemId);
+                command = new CreateAuction(auctionId, timestamp, auctioneerId, itemId);
                 break;
 
             case CANCEL_AUCTION:
-                long auctionIdCancel = Long.parseLong(fields[currentIndex++]);
-                command = new CancelAuction(auctionIdCancel, timestamp);
+                command = new CancelAuction(auctionId, timestamp);
                 break;
 
             case START_AUCTION:
-                long auctionIdStart = Long.parseLong(fields[currentIndex++]);
-                command = new StartAuction(auctionIdStart, timestamp);
+                command = new StartAuction(auctionId, timestamp);
                 break;
 
             case FINISH_AUCTION:
-                long auctionIdFinish = Long.parseLong(fields[currentIndex++]);
-                command = new FinishAuction(auctionIdFinish, timestamp);
+                command = new FinishAuction(auctionId, timestamp);
                 break;
 
             case PLACE_BID:
-                long auctionIdPlaceBid = Long.parseLong(fields[currentIndex++]);
                 long bidderId = Long.parseLong(fields[currentIndex++]);
-                double bidAmount = Long.parseLong(fields[currentIndex++]);
-                command = new PlaceBid(auctionIdPlaceBid, timestamp, bidderId, bidAmount);
+                double bidAmount = Double.parseDouble(fields[currentIndex++]);
+                command = new PlaceBid(auctionId, timestamp, bidderId, bidAmount);
                 break;
         }
 
         return command;
     }
 
-    public final long getAuctionId() {
+    public final UUID getAuctionId() {
         return auctionId;
     }
 
-    public final long getTimestamp() {
+    public final LocalDateTime getTimestamp() {
         return timestamp;
     }
 

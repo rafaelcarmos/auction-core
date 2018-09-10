@@ -1,22 +1,22 @@
 package messaging;
 
-import domain.auction.repository.Repository;
-import messaging.abq.ABQCommandDispatcher;
-import messaging.disruptor.DisruptorCommandDispatcher;
+import domain.auction.service.AuctionService;
+import messaging.dispatchers.ABQCommandDispatcher;
+import messaging.dispatchers.DisruptorCommandDispatcher;
 
 public class CommandDispatcherFactory {
 
-    public static CommandDispatcher getDispatcher(String name, Repository repository, int bufferSize)
+    public static CommandDispatcher getDispatcher(String name, AuctionService auctionService, int bufferSize)
             throws Exception {
 
         CommandDispatcher dispatcher = null;
 
         switch (name.toUpperCase()) {
             case "ABQ":
-                dispatcher = new ABQCommandDispatcher(repository, bufferSize);
+                dispatcher = new ABQCommandDispatcher(auctionService, bufferSize);
                 break;
             case "DISRUPTOR":
-                dispatcher = new DisruptorCommandDispatcher(repository, bufferSize);
+                dispatcher = new DisruptorCommandDispatcher(auctionService, bufferSize);
                 break;
             default:
                 throw new IllegalArgumentException("Dispatcher type not found: " + name);
