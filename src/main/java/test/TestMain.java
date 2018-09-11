@@ -40,13 +40,13 @@ public class TestMain {
 
             UUID auctionId = UUID.randomUUID();
 
-            String createAuction = CommandType.CREATE_AUCTION + ";" + auctionId + ";-1;-1";
+            String createAuction = CommandType.CREATE_AUCTION + ";" + auctionId + ";-1;-1\n";
             dispatcher.processCommand(createAuction);
 
-            String startAuction = CommandType.START_AUCTION + ";" + auctionId;
+            String startAuction = CommandType.START_AUCTION + ";" + auctionId + "\n";
             dispatcher.processCommand(startAuction);
 
-            String placeBid = CommandType.PLACE_BID + ";" + auctionId + ";-1;10.00";
+            String placeBid = CommandType.PLACE_BID + ";" + auctionId + ";-1;10.00\n";
 
             Columns cols = new Columns();
             cols.addLine("#", "Type", "Nano", "Throughput Msgs/second");
@@ -60,7 +60,7 @@ public class TestMain {
                 for (int commandCount = 0; commandCount < size; commandCount++)
                     dispatcher.processCommand(placeBid);
 
-                String callbackCommand = "CALLBACK_COMMAND;" + auctionId;
+                String callbackCommand = "CALLBACK_COMMAND;" + auctionId + "\n";
 
                 if (!(dispatcher instanceof SingleThreadedCommandDispatcher)) {
                     dispatcher.processCommand(callbackCommand);

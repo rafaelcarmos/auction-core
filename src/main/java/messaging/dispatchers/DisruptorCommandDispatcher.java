@@ -23,12 +23,20 @@ public class DisruptorCommandDispatcher implements CommandDispatcher {
     };
     private final Disruptor<CommandBase> disruptor;
     private final AuctionService auctionService;
+    private final CommandJournaler journaler;
+    private final CommandParser parser;
+    private final CommandProcessor processor;
 
     public DisruptorCommandDispatcher(AuctionService auctionService, int bufferSize) throws Exception {
 
         this.auctionService = auctionService;
+
+        journaler = new CommandJournaler();
+        parser = new CommandParser();
+        processor = new CommandProcessor(auctionService);
+
         disruptor = new Disruptor<>(CommandBase::new, bufferSize, Executors.privilegedThreadFactory(), ProducerType.SINGLE, new BusySpinWaitStrategy());
-        disruptor.handleEventsWith(new CommandJournaler(), new CommandParser()).then(new CommandProcessor(auctionService));
+        disruptor.handleEventsWith(new CommandJournaler(), new CommandParser()).then(processor);
         disruptor.start();
     }
 
@@ -41,5 +49,6 @@ public class DisruptorCommandDispatcher implements CommandDispatcher {
     public void shutdown() {
         disruptor.shutdown();
         auctionService.close();
+
     }
 }

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 public class CommandJournaler implements EventHandler<CommandBase> {
 
-    private final int BUFFER_SIZE = 1024;
+    private final int BUFFER_SIZE = 1024 * 10;
 
     private RandomAccessFile raf;
     private ByteBuffer buffer;
@@ -25,7 +25,7 @@ public class CommandJournaler implements EventHandler<CommandBase> {
     public void onEvent(CommandBase commandBase, long sequence, boolean endOfBatch) {
         try {
 
-            byte[] msg = (commandBase.getRawMessage() + System.lineSeparator()).getBytes();
+            byte[] msg = commandBase.getRawMessage().getBytes();
 
             if (msg.length >= buffer.remaining())
                 writeBytes();
@@ -42,7 +42,11 @@ public class CommandJournaler implements EventHandler<CommandBase> {
     }
 
     private void writeBytes() throws Exception {
-        //raf.write(buffer.array());
+        raf.write(buffer.array());
         buffer.clear();
+    }
+
+    public void close() throws Exception {
+        raf.close();
     }
 }

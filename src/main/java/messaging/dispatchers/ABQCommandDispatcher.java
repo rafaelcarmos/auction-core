@@ -144,6 +144,7 @@ public class ABQCommandDispatcher implements CommandDispatcher {
 
             executor.shutdownNow();
             auctionService.close();
+            journaler.close();
 
         } catch (Exception ex) {
             ex.printStackTrace();
