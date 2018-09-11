@@ -18,11 +18,14 @@ public class ABQCommandDispatcher implements CommandDispatcher {
     private final ArrayBlockingQueue<CommandBase> parserInputQueue;
     private final ArrayBlockingQueue<CommandBase> journalerOutputQueue;
     private final ArrayBlockingQueue<CommandBase> parserOutputQueue;
-    private final ExecutorService executor;
-    private final AuctionService auctionService;
+
     private final CommandJournaler journaler;
     private final CommandParser parser;
     private final CommandProcessor processor;
+
+    private final ExecutorService executor;
+    private final AuctionService auctionService;
+
     private boolean stopped = false;
 
     public ABQCommandDispatcher(AuctionService auctionService, int queueSize) throws Exception {
@@ -48,6 +51,7 @@ public class ABQCommandDispatcher implements CommandDispatcher {
 
     @Override
     public void processCommand(String rawMessage) throws Exception {
+
         CommandBase cmd = new CommandBase();
         cmd.setRawMessage(rawMessage);
         mainInputQueue.put(cmd);
@@ -66,7 +70,6 @@ public class ABQCommandDispatcher implements CommandDispatcher {
                     journalerInputQueue.put(cmd);
                     parserInputQueue.put(cmd);
                 }
-
             } catch (Exception ex) {
 
             }
@@ -83,11 +86,10 @@ public class ABQCommandDispatcher implements CommandDispatcher {
 
                     CommandBase cmd = journalerInputQueue.take();
 
-                    journaler.onEvent(cmd, -1, false);
+                    journaler.onEvent(cmd, -1, journalerInputQueue.isEmpty());
 
                     journalerOutputQueue.put(cmd);
                 }
-
             } catch (Exception ex) {
 
             }
@@ -104,11 +106,10 @@ public class ABQCommandDispatcher implements CommandDispatcher {
 
                     CommandBase cmd = parserInputQueue.take();
 
-                    parser.onEvent(cmd, -1, false);
+                    parser.onEvent(cmd, -1, parserInputQueue.isEmpty());
 
                     parserOutputQueue.put(cmd);
                 }
-
             } catch (Exception ex) {
 
             }
@@ -121,14 +122,16 @@ public class ABQCommandDispatcher implements CommandDispatcher {
 
             try {
 
-                CommandBase cmdJournaler = journalerOutputQueue.take();
-                CommandBase cmdParser = parserOutputQueue.take();
+                while (!journalerOutputQueue.isEmpty() && !parserOutputQueue.isEmpty()) {
 
-                if (cmdJournaler != cmdParser)
-                    throw new Exception("Unsynchronized queues");
+                    CommandBase cmdJournaler = journalerOutputQueue.take();
+                    CommandBase cmdParser = parserOutputQueue.take();
 
-                processor.onEvent(cmdJournaler, -1, false);
+                    if (cmdJournaler != cmdParser)
+                        throw new Exception("Unsynchronized queues");
 
+                    processor.onEvent(cmdJournaler, -1, journalerOutputQueue.isEmpty() && parserOutputQueue.isEmpty());
+                }
             } catch (Exception ex) {
 
             }

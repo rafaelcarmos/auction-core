@@ -43,9 +43,11 @@ public class SingleThreadedABQCommandDispatcher implements CommandDispatcher {
 
             try {
 
-                CommandBase cmd = mainInputQueue.take();
-                handler.onEvent(cmd, sequence++, false);
+                while (!mainInputQueue.isEmpty()) {
 
+                    CommandBase cmd = mainInputQueue.take();
+                    handler.onEvent(cmd, sequence++, mainInputQueue.isEmpty());
+                }
             } catch (Exception ex) {
 
             }
@@ -61,6 +63,7 @@ public class SingleThreadedABQCommandDispatcher implements CommandDispatcher {
 
             executor.shutdownNow();
             auctionService.close();
+            handler.close();
 
         } catch (Exception ex) {
             ex.printStackTrace();

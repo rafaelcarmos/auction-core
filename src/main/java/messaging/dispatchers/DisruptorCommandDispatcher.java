@@ -15,12 +15,7 @@ import java.util.concurrent.Executors;
 
 public class DisruptorCommandDispatcher implements CommandDispatcher {
 
-    private final EventTranslatorOneArg<CommandBase, String> translator = new EventTranslatorOneArg<CommandBase, String>() {
-        @Override
-        public void translateTo(CommandBase event, long sequence, String rawMessage) {
-            event.setRawMessage(rawMessage);
-        }
-    };
+    private final EventTranslatorOneArg<CommandBase, String> translator = (event, sequence, rawMessage) -> event.setRawMessage(rawMessage);
     private final Disruptor<CommandBase> disruptor;
     private final AuctionService auctionService;
     private final CommandJournaler journaler;
@@ -47,6 +42,7 @@ public class DisruptorCommandDispatcher implements CommandDispatcher {
 
     @Override
     public void shutdown() {
+
         disruptor.shutdown();
         auctionService.close();
 

@@ -14,6 +14,7 @@ public class CommandParser implements EventHandler<CommandBase> {
 
     @Override
     public void onEvent(CommandBase commandBase, long sequence, boolean endOfBatch) {
+
         try {
 
             commandBase.setSequence(sequence);
