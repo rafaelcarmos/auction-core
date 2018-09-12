@@ -3,12 +3,9 @@ package domain.auction.commands;
 import domain.auction.Auction;
 import domain.auction.events.Event;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 public class StartAuction extends Command {
 
-    public StartAuction(UUID auctionId, LocalDateTime timestamp) {
+    public StartAuction(String auctionId, long timestamp) {
         super(auctionId, timestamp);
     }
 

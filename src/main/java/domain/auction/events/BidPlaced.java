@@ -2,14 +2,11 @@ package domain.auction.events;
 
 import domain.auction.Auction;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 public class BidPlaced extends Event {
     private final long bidderId;
     private final double amount;
 
-    public BidPlaced(UUID auctionId, LocalDateTime timestamp, long bidderId, double amount) {
+    public BidPlaced(String auctionId, long timestamp, long bidderId, double amount) {
         super(auctionId, timestamp);
         this.bidderId = bidderId;
         this.amount = amount;

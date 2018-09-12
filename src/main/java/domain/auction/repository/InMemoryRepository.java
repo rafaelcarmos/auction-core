@@ -3,24 +3,23 @@ package domain.auction.repository;
 import domain.auction.Auction;
 
 import java.util.HashMap;
-import java.util.UUID;
 
 
 public class InMemoryRepository implements Repository {
 
-    HashMap<UUID, Auction> auctionsById;
+    final HashMap<String, Auction> auctionsById;
 
     public InMemoryRepository() {
         auctionsById = new HashMap<>();
     }
 
     @Override
-    public Auction getAuction(UUID id) {
+    public Auction getAuction(String id) {
         return auctionsById.get(id);
     }
 
     @Override
-    public Auction createAndGetAuction(UUID id) {
+    public Auction createAndGetAuction(String id) {
         Auction auction = new Auction(id);
         auctionsById.put(id, auction);
         return auction;

@@ -9,35 +9,29 @@ import messaging.CommandBase;
 import messaging.CommandDispatcher;
 import messaging.handlers.CommandJournaler;
 import messaging.handlers.CommandParser;
-import messaging.handlers.CommandProcessor;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 
-public class DisruptorCommandDispatcher implements CommandDispatcher {
+public class DisruptorCommandDispatcher extends CommandDispatcher {
 
     private final EventTranslatorOneArg<CommandBase, String> translator = (event, sequence, rawMessage) -> event.setRawMessage(rawMessage);
     private final Disruptor<CommandBase> disruptor;
-    private final AuctionService auctionService;
-    private final CommandJournaler journaler;
-    private final CommandParser parser;
-    private final CommandProcessor processor;
 
-    public DisruptorCommandDispatcher(AuctionService auctionService, int bufferSize) throws Exception {
+    public DisruptorCommandDispatcher(AuctionService auctionService, int size, CountDownLatch latch) throws Exception {
 
-        this.auctionService = auctionService;
+        super(auctionService, size, latch);
 
-        journaler = new CommandJournaler();
-        parser = new CommandParser();
-        processor = new CommandProcessor(auctionService);
-
-        disruptor = new Disruptor<>(CommandBase::new, bufferSize, Executors.privilegedThreadFactory(), ProducerType.SINGLE, new BusySpinWaitStrategy());
+        disruptor = new Disruptor<>(CommandBase::new, size, Executors.privilegedThreadFactory(), ProducerType.SINGLE, new BusySpinWaitStrategy());
         disruptor.handleEventsWith(new CommandJournaler(), new CommandParser()).then(processor);
         disruptor.start();
     }
 
     @Override
     public void processCommand(String rawMessage) {
+
         disruptor.publishEvent(translator, rawMessage);
+
     }
 
     @Override

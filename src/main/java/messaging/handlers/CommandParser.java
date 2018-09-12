@@ -4,8 +4,6 @@ import com.lmax.disruptor.EventHandler;
 import domain.auction.commands.Command;
 import messaging.CommandBase;
 
-import java.time.LocalDateTime;
-
 public class CommandParser implements EventHandler<CommandBase> {
 
     public CommandParser() {
@@ -17,11 +15,9 @@ public class CommandParser implements EventHandler<CommandBase> {
 
         try {
 
-            commandBase.setSequence(sequence);
             String csv = commandBase.getRawMessage();
-            LocalDateTime timestamp = LocalDateTime.now();
 
-            Command command = Command.fromCSV(csv, timestamp);
+            Command command = Command.fromCSV(csv, System.currentTimeMillis());
 
             commandBase.setCommand(command);
 

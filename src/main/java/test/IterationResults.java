@@ -1,12 +1,14 @@
 package test;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.TimeUnit;
 
 public class IterationResults implements Comparable<IterationResults> {
 
-    private int producers;
-    private long nanoTime;
-    private int size;
+    private final int producers;
+    private final long nanoTime;
+    private final int size;
 
     public IterationResults(int producers, long nanoTime, int size) {
         this.producers = producers;
@@ -35,7 +37,7 @@ public class IterationResults implements Comparable<IterationResults> {
     }
 
     @Override
-    public int compareTo(IterationResults o) {
+    public int compareTo(@NotNull IterationResults o) {
         return Long.compare(nanoTime, o.nanoTime);
     }
 }

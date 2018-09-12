@@ -6,8 +6,8 @@ import java.util.List;
 
 public class Columns {
 
-    List<List<String>> lines = new ArrayList<>();
-    List<Integer> maxLengths = new ArrayList<>();
+    final List<List<String>> lines = new ArrayList<>();
+    final List<Integer> maxLengths = new ArrayList<>();
     int numColumns = -1;
 
     public Columns addLine(String... line) {
@@ -42,20 +42,22 @@ public class Columns {
     }
 
     public String toString() {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (List<String> line : lines) {
             for (int i = 0; i < numColumns; i++) {
-                result += pad(line.get(i), maxLengths.get(i) + 1);
+                result.append(pad(line.get(i), maxLengths.get(i) + 1));
             }
-            result += System.lineSeparator();
+            result.append(System.lineSeparator());
         }
-        return result;
+        return result.toString();
     }
 
     private String pad(String word, int newLength) {
-        while (word.length() < newLength) {
-            word += " ";
+        StringBuilder wordBuilder = new StringBuilder(word);
+        while (wordBuilder.length() < newLength) {
+            wordBuilder.append(" ");
         }
+        word = wordBuilder.toString();
         word += "     ";
         return word;
     }

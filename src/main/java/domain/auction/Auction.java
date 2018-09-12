@@ -8,17 +8,16 @@ import domain.auction.exceptions.AuctionNotStartedException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class Auction {
-    private final UUID id;
+    private final String id;
     private long auctioneerId;
     private long itemId;
     private long currentWinnerId;
     private double currentWinningBid = 0;
     private AuctionState state;
 
-    public Auction(UUID id) {
+    public Auction(String id) {
         this.id = id;
     }
 
@@ -27,10 +26,10 @@ public class Auction {
     }
 
     public void apply(Event event) {
-
+        event.accept(this);
     }
 
-    public UUID getId() {
+    public String getId() {
         return id;
     }
 

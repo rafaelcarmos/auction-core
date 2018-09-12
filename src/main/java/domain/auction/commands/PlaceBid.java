@@ -3,14 +3,11 @@ package domain.auction.commands;
 import domain.auction.Auction;
 import domain.auction.events.Event;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 public class PlaceBid extends Command {
     private final long bidderId;
     private final double amount;
 
-    public PlaceBid(UUID auctionId, LocalDateTime timestamp, long bidderId, double amount) {
+    public PlaceBid(String auctionId, long timestamp, long bidderId, double amount) {
         super(auctionId, timestamp);
         this.bidderId = bidderId;
         this.amount = amount;

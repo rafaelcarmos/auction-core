@@ -6,10 +6,9 @@ public enum CommandType {
     CANCEL_AUCTION,
     START_AUCTION,
     FINISH_AUCTION,
-    PLACE_BID,
-    CALLBACK_COMMAND;
+    PLACE_BID;
 
-    private static CommandType[] values = CommandType.values();
+    private static final CommandType[] values = CommandType.values();
 
     public static CommandType fromInt(int i) {
         return CommandType.values[i];

@@ -7,18 +7,22 @@ import domain.auction.service.AuctionService;
 import domain.auction.service.AuctionServiceImpl;
 import messaging.CommandDispatcher;
 import messaging.CommandDispatcherFactory;
-import messaging.dispatchers.ABQCommandDispatcher;
+import messaging.dispatchers.DisruptorCommandDispatcher;
 
 import java.text.NumberFormat;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
-public class TestMain {
+public class ThroughputTest {
 
     public static void main(String args[]) {
 
-        int size = 100000;
-        int iterations = 1;
-        int bufferSize = (1024 * 1024);
+        int size = 2 * (1000 * 1000);
+        int iterations = 10;
+        int bufferSize = 1 * (1024 * 1024);
+        CountDownLatch latch = new CountDownLatch(size);
 
         CommandDispatcher dispatcher = null;
         Repository repository = new InMemoryRepository();
@@ -33,9 +37,9 @@ public class TestMain {
                 iterations = Integer.parseInt(args[1]);
 
             if (args.length > 2)
-                dispatcher = CommandDispatcherFactory.getDispatcher(args[2], auctionService, bufferSize);
+                dispatcher = CommandDispatcherFactory.getDispatcher(args[2], auctionService, bufferSize, latch);
             else
-                dispatcher = new ABQCommandDispatcher(auctionService, bufferSize);
+                dispatcher = new DisruptorCommandDispatcher(auctionService, bufferSize, latch);
 
 
             UUID auctionId = UUID.randomUUID();
@@ -49,35 +53,33 @@ public class TestMain {
             String placeBid = CommandType.PLACE_BID + ";" + auctionId + ";-1;10.00";
 
             Columns cols = new Columns();
-            cols.addLine("#", "Type", "Nano", "Messages/ms");
+            cols.addLine("#", "Type", "Milli", "Messages/millisecond");
 
             for (int iteration = 0; iteration < iterations; iteration++) {
 
-                long startNano = System.nanoTime();
+                long timerStart = System.nanoTime();
 
                 for (int commandCount = 0; commandCount < size; commandCount++)
                     dispatcher.processCommand(placeBid);
 
-//                String callbackCommand = "CALLBACK_COMMAND;" + auctionId;
-//
-//                dispatcher.processCommand(callbackCommand);
-//
-//                synchronized (callbackCommand) {
-//                    callbackCommand.wait();
-//                }
+                long timerEnd = System.nanoTime();
+                long elapsedTimeNano = timerEnd - timerStart;
+                double elapsedMilli = TimeUnit.NANOSECONDS.toMillis(elapsedTimeNano);
+                double throughput = size / elapsedMilli;
 
-                long endNano = System.nanoTime();
-                long elapsedNano = endNano - startNano;
-                double elapsedMiliseconds = elapsedNano / 1000000;
-                double throughput = size / elapsedMiliseconds;
-                cols.addLine(Integer.toString(iteration), dispatcher.getClass().getSimpleName(), Long.toString(elapsedNano), NumberFormat.getIntegerInstance().format(throughput));
+                cols.addLine(Integer.toString(iteration), dispatcher.getClass().getSimpleName(), Double.toString(elapsedMilli), NumberFormat.getIntegerInstance().format(throughput));
+
                 cols.print();
+
+                latch.await();
+                latch = new CountDownLatch(size);
+                dispatcher.setLatch(latch);
             }
 
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
-            dispatcher.shutdown();
+            Objects.requireNonNull(dispatcher).shutdown();
         }
     }
 }

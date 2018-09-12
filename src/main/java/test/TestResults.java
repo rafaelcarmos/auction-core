@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 public class TestResults {
 
-    private List<IterationResults> iterations = new ArrayList<>();
-    private String type;
+    private final List<IterationResults> iterations = new ArrayList<>();
+    private final String type;
 
     public TestResults(String type) {
         this.type = type;
@@ -26,15 +26,15 @@ public class TestResults {
     }
 
     public double getAverageThroughput() {
-        return iterations.stream().collect(Collectors.averagingDouble(i -> i.getThroughput()));
+        return iterations.stream().collect(Collectors.averagingDouble(IterationResults::getThroughput));
     }
 
     public double getAverageNanoTime() {
-        return iterations.stream().collect(Collectors.averagingLong(i -> i.getNanoTime()));
+        return iterations.stream().collect(Collectors.averagingLong(IterationResults::getNanoTime));
     }
 
     public double getAverageMilliTime() {
-        return iterations.stream().collect(Collectors.averagingLong(i -> i.getMilliTime()));
+        return iterations.stream().collect(Collectors.averagingLong(IterationResults::getMilliTime));
     }
 
     public double getMedianThroughput() {

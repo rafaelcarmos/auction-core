@@ -6,7 +6,7 @@ public interface AuctionService {
 
     void processCommand(Command command) throws Exception;
 
-    void replayHistory() throws Exception;
+    void replayHistory();
 
     void close();
 

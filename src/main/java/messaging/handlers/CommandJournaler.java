@@ -14,7 +14,7 @@ public class CommandJournaler implements EventHandler<CommandBase> {
     private final int BUFFER_SIZE = 1024 * 4;
 
     private RandomAccessFile raf;
-    private CharBuffer buffer;
+    private final CharBuffer buffer;
 
     public CommandJournaler() throws FileNotFoundException {
 

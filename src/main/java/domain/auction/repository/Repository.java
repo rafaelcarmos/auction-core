@@ -2,13 +2,11 @@ package domain.auction.repository;
 
 import domain.auction.Auction;
 
-import java.util.UUID;
-
 public interface Repository {
 
-    Auction getAuction(UUID id);
+    Auction getAuction(String id);
 
-    Auction createAndGetAuction(UUID id);
+    Auction createAndGetAuction(String id);
 
     void close();
 }

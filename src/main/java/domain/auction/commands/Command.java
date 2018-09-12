@@ -2,36 +2,30 @@ package domain.auction.commands;
 
 import domain.auction.Auction;
 import domain.auction.events.Event;
-import test.CallbackCommand;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 public abstract class Command {
 
-    private final UUID auctionId;
-    private final LocalDateTime timestamp;
+    private final String auctionId;
+    private final long timestamp;
 
-    public Command(UUID auctionId, LocalDateTime timestamp) {
+    public Command(String auctionId, long timestamp) {
         this.auctionId = auctionId;
         this.timestamp = timestamp;
     }
 
-    public final static Command fromCSV(String csv, LocalDateTime timestamp) {
+    public static Command fromCSV(String csv, long timestamp) {
 
         String[] fields = csv.split(";");
 
         int currentIndex = 0;
-        UUID auctionId = null;
+        String auctionId;
 
         CommandType commandType = CommandType.valueOf(fields[currentIndex++]);
 
-        if (commandType != CommandType.CALLBACK_COMMAND) {
-            if (timestamp == null)
-                timestamp = LocalDateTime.parse(fields[currentIndex++]);
+        if (timestamp == -1)
+            timestamp = System.currentTimeMillis();
 
-            auctionId = UUID.fromString(fields[currentIndex++]);
-        }
+        auctionId = fields[currentIndex++];
 
         Command command = null;
 
@@ -60,23 +54,16 @@ public abstract class Command {
                 double bidAmount = Double.parseDouble(fields[currentIndex++]);
                 command = new PlaceBid(auctionId, timestamp, bidderId, bidAmount);
                 break;
-
-            case CALLBACK_COMMAND:
-                synchronized (csv) {
-                    csv.notifyAll();
-                }
-                command = new CallbackCommand(auctionId, timestamp);
-                break;
         }
 
         return command;
     }
 
-    public final UUID getAuctionId() {
+    public final String getAuctionId() {
         return auctionId;
     }
 
-    public final LocalDateTime getTimestamp() {
+    public final long getTimestamp() {
         return timestamp;
     }
 

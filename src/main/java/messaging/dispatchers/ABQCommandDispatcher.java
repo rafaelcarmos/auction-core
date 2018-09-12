@@ -3,15 +3,13 @@ package messaging.dispatchers;
 import domain.auction.service.AuctionService;
 import messaging.CommandBase;
 import messaging.CommandDispatcher;
-import messaging.handlers.CommandJournaler;
-import messaging.handlers.CommandParser;
-import messaging.handlers.CommandProcessor;
 
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ABQCommandDispatcher implements CommandDispatcher {
+public class ABQCommandDispatcher extends CommandDispatcher {
 
     private final ArrayBlockingQueue<CommandBase> mainInputQueue;
     private final ArrayBlockingQueue<CommandBase> journalerInputQueue;
@@ -19,34 +17,26 @@ public class ABQCommandDispatcher implements CommandDispatcher {
     private final ArrayBlockingQueue<CommandBase> journalerOutputQueue;
     private final ArrayBlockingQueue<CommandBase> parserOutputQueue;
 
-    private final CommandJournaler journaler;
-    private final CommandParser parser;
-    private final CommandProcessor processor;
-
     private final ExecutorService executor;
-    private final AuctionService auctionService;
 
     private boolean stopped = false;
 
-    public ABQCommandDispatcher(AuctionService auctionService, int queueSize) throws Exception {
+    public ABQCommandDispatcher(AuctionService auctionService, int size, CountDownLatch latch) throws Exception {
+
+        super(auctionService, size, latch);
 
         this.executor = Executors.newCachedThreadPool();
-        this.auctionService = auctionService;
 
-        journaler = new CommandJournaler();
-        parser = new CommandParser();
-        processor = new CommandProcessor(auctionService);
+        this.mainInputQueue = new ArrayBlockingQueue<>(size);
+        this.journalerInputQueue = new ArrayBlockingQueue<>(size);
+        this.parserInputQueue = new ArrayBlockingQueue<>(size);
+        this.journalerOutputQueue = new ArrayBlockingQueue<>(size);
+        this.parserOutputQueue = new ArrayBlockingQueue<>(size);
 
-        mainInputQueue = new ArrayBlockingQueue<>(queueSize);
-        journalerInputQueue = new ArrayBlockingQueue<>(queueSize);
-        parserInputQueue = new ArrayBlockingQueue<>(queueSize);
-        journalerOutputQueue = new ArrayBlockingQueue<>(queueSize);
-        parserOutputQueue = new ArrayBlockingQueue<>(queueSize);
-
-        executor.submit(this::consumeMainInputQueue);
-        executor.submit(this::consumeJournalerInputQueue);
-        executor.submit(this::consumeParserInputQueue);
-        executor.submit(this::consumeParserAndJournalerOuputQueue);
+        this.executor.submit(this::consumeMainInputQueue);
+        this.executor.submit(this::consumeJournalerInputQueue);
+        this.executor.submit(this::consumeParserInputQueue);
+        this.executor.submit(this::consumeParserAndJournalerOuputQueue);
     }
 
     @Override
@@ -124,13 +114,10 @@ public class ABQCommandDispatcher implements CommandDispatcher {
 
                 while (!journalerOutputQueue.isEmpty() && !parserOutputQueue.isEmpty()) {
 
-                    CommandBase cmdJournaler = journalerOutputQueue.take();
+                    journalerOutputQueue.take();
                     CommandBase cmdParser = parserOutputQueue.take();
 
-                    if (cmdJournaler != cmdParser)
-                        throw new Exception("Unsynchronized queues");
-
-                    processor.onEvent(cmdJournaler, -1, journalerOutputQueue.isEmpty() && parserOutputQueue.isEmpty());
+                    processor.onEvent(cmdParser, -1, journalerOutputQueue.isEmpty() && parserOutputQueue.isEmpty());
                 }
             } catch (Exception ex) {
 
