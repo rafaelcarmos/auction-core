@@ -18,7 +18,7 @@ public class LatencyTest {
 
     public static void main(String args[]) {
 
-        int size = 2 * (1000 * 1000);
+        int size = 1 * (1000 * 1000);
         int iterations = 10;
         int bufferSize = 1 * (1024 * 1024);
         CountDownLatch latch = new CountDownLatch(size);
@@ -72,6 +72,8 @@ public class LatencyTest {
                 cols.print();
                 latch = new CountDownLatch(size);
                 dispatcher.setLatch(latch);
+
+                System.gc();
             }
 
         } catch (Exception ex) {

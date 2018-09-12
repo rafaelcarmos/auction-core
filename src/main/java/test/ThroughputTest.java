@@ -7,7 +7,7 @@ import domain.auction.service.AuctionService;
 import domain.auction.service.AuctionServiceImpl;
 import messaging.CommandDispatcher;
 import messaging.CommandDispatcherFactory;
-import messaging.dispatchers.DisruptorCommandDispatcher;
+import messaging.dispatchers.ABQCommandDispatcher;
 
 import java.text.NumberFormat;
 import java.util.Objects;
@@ -19,7 +19,7 @@ public class ThroughputTest {
 
     public static void main(String args[]) {
 
-        int size = 2 * (1000 * 1000);
+        int size = 1 * (1000 * 1000);
         int iterations = 10;
         int bufferSize = 1 * (1024 * 1024);
         CountDownLatch latch = new CountDownLatch(size);
@@ -39,7 +39,7 @@ public class ThroughputTest {
             if (args.length > 2)
                 dispatcher = CommandDispatcherFactory.getDispatcher(args[2], auctionService, bufferSize, latch);
             else
-                dispatcher = new DisruptorCommandDispatcher(auctionService, bufferSize, latch);
+                dispatcher = new ABQCommandDispatcher(auctionService, bufferSize, latch);
 
 
             UUID auctionId = UUID.randomUUID();
@@ -54,6 +54,7 @@ public class ThroughputTest {
 
             Columns cols = new Columns();
             cols.addLine("#", "Type", "Milli", "Messages/millisecond");
+
 
             for (int iteration = 0; iteration < iterations; iteration++) {
 
@@ -74,6 +75,8 @@ public class ThroughputTest {
                 latch.await();
                 latch = new CountDownLatch(size);
                 dispatcher.setLatch(latch);
+
+                System.gc();
             }
 
         } catch (Exception ex) {

@@ -21,7 +21,7 @@ public class CommandJournaler implements EventHandler<CommandBase> {
         buffer = CharBuffer.allocate(BUFFER_SIZE);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-        raf = new RandomAccessFile("F:/commandJournal_" + LocalDateTime.now().format(formatter), "rw");
+        raf = new RandomAccessFile("commandJournal_" + LocalDateTime.now().format(formatter), "rw");
     }
 
     @Override
