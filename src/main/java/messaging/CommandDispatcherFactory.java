@@ -1,8 +1,8 @@
 package messaging;
 
 import domain.auction.service.AuctionService;
-import messaging.dispatchers.ABQCommandDispatcher;
-import messaging.dispatchers.DisruptorCommandDispatcher;
+import messaging.dispatchers.ArrayBlockingQueueDispatcher;
+import messaging.dispatchers.DisruptorDispatcher;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -15,10 +15,10 @@ public class CommandDispatcherFactory {
 
         switch (name.toUpperCase()) {
             case "ABQ":
-                dispatcher = new ABQCommandDispatcher(auctionService, size, latch);
+                dispatcher = new ArrayBlockingQueueDispatcher(auctionService, size, latch);
                 break;
             case "DISRUPTOR":
-                dispatcher = new DisruptorCommandDispatcher(auctionService, size, latch);
+                dispatcher = new DisruptorDispatcher(auctionService, size, latch);
                 break;
             default:
                 throw new IllegalArgumentException("Dispatcher type not found: " + name);

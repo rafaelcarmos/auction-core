@@ -4,40 +4,36 @@ import domain.auction.service.AuctionService;
 import messaging.CommandBase;
 import messaging.CommandDispatcher;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ABQCommandDispatcher extends CommandDispatcher {
-
-    private final ArrayBlockingQueue<CommandBase> mainInputQueue;
-    private final ArrayBlockingQueue<CommandBase> journalerInputQueue;
-    private final ArrayBlockingQueue<CommandBase> parserInputQueue;
-    private final ArrayBlockingQueue<CommandBase> journalerOutputQueue;
-    private final ArrayBlockingQueue<CommandBase> parserOutputQueue;
+public abstract class BaseQueueDispatcher extends CommandDispatcher {
 
     private final ExecutorService executor;
-
+    protected BlockingQueue<CommandBase> mainInputQueue;
+    protected BlockingQueue<CommandBase> journalerInputQueue;
+    protected BlockingQueue<CommandBase> parserInputQueue;
+    protected BlockingQueue<CommandBase> journalerOutputQueue;
+    protected BlockingQueue<CommandBase> parserOutputQueue;
     private boolean stopped = false;
 
-    public ABQCommandDispatcher(AuctionService auctionService, int size, CountDownLatch latch) throws Exception {
+    public BaseQueueDispatcher(AuctionService auctionService, int size, CountDownLatch latch) throws Exception {
 
         super(auctionService, size, latch);
 
-        this.executor = Executors.newCachedThreadPool();
+        InitializeQueues();
 
-        this.mainInputQueue = new ArrayBlockingQueue<>(size);
-        this.journalerInputQueue = new ArrayBlockingQueue<>(size);
-        this.parserInputQueue = new ArrayBlockingQueue<>(size);
-        this.journalerOutputQueue = new ArrayBlockingQueue<>(size);
-        this.parserOutputQueue = new ArrayBlockingQueue<>(size);
+        this.executor = Executors.newCachedThreadPool();
 
         this.executor.submit(this::consumeMainInputQueue);
         this.executor.submit(this::consumeJournalerInputQueue);
         this.executor.submit(this::consumeParserInputQueue);
         this.executor.submit(this::consumeParserAndJournalerOuputQueue);
     }
+
+    protected abstract void InitializeQueues();
 
     @Override
     public void processCommand(String rawMessage) throws Exception {
