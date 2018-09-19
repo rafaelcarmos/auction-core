@@ -12,13 +12,13 @@ public class IndividualLatencyBenchmark implements BenchmarkBase {
 
 
     @Override
-    public void run(CommandDispatcher dispatcher, String command, int totalCommands) throws Exception {
+    public void run(CommandDispatcher dispatcher, String command, int iterations) throws Exception {
 
-        CountDownLatch latch = new CountDownLatch(totalCommands);
+        CountDownLatch latch = new CountDownLatch(1);
         dispatcher.setLatch(latch);
 
-        long[] latencies = new long[totalCommands];
-        for (int commandCount = 0; commandCount < totalCommands; commandCount++) {
+        long[] latencies = new long[iterations];
+        for (int commandCount = 0; commandCount < iterations; commandCount++) {
 
             long timerStart = System.nanoTime();
 
@@ -36,10 +36,10 @@ public class IndividualLatencyBenchmark implements BenchmarkBase {
 
         Arrays.sort(latencies);
 
-        int ninetyNinePercent = (totalCommands * 99) / 100;
+        int ninetyNinePercent = (iterations * 99) / 100;
 
         ninetyNinePercentBelow = latencies[ninetyNinePercent];
-        medianLatency = latencies[totalCommands / 2];
+        medianLatency = latencies[iterations / 2];
 
         System.gc();
     }

@@ -3,7 +3,6 @@ package messaging.handlers;
 import com.lmax.disruptor.EventHandler;
 import messaging.CommandBase;
 
-import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
@@ -11,16 +10,21 @@ import java.time.format.DateTimeFormatter;
 
 public class CommandJournaler implements EventHandler<CommandBase> {
 
-    private final int BUFFER_SIZE = 1024 * 4;
+    private final int ONE_MEGA_BYTE = (1024 * 1024);
+    private final int BUFFER_SIZE = ONE_MEGA_BYTE * 4;
     private final byte[] lineSeparator = System.lineSeparator().getBytes();
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
     private RandomAccessFile raf;
     private final ByteBuffer buffer;
 
-    public CommandJournaler() throws FileNotFoundException {
+    public CommandJournaler() throws Exception {
 
         buffer = ByteBuffer.allocate(BUFFER_SIZE);
+        createNewJournal();
+    }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+    private void createNewJournal() throws Exception {
+
         raf = new RandomAccessFile("F:/AuctionCoreCommandJournal/commandJournal_" + LocalDateTime.now().format(formatter), "rw");
     }
 
@@ -35,8 +39,11 @@ public class CommandJournaler implements EventHandler<CommandBase> {
 
             buffer.put(bytes).put(lineSeparator);
 
-            if (endOfBatch)
+            if (endOfBatch) {
+
                 writeBytes();
+
+            }
 
         } catch (Exception ex) {
 
@@ -46,9 +53,15 @@ public class CommandJournaler implements EventHandler<CommandBase> {
     }
 
     private void writeBytes() throws Exception {
+
         buffer.flip();
         raf.getChannel().write(buffer);
         buffer.clear();
+
+        if ((raf.length() / ONE_MEGA_BYTE) > 500) {
+            raf.close();
+            createNewJournal();
+        }
     }
 
     public void close() throws Exception {

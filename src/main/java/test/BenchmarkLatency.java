@@ -12,10 +12,9 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BenchmarkThroughput {
+public class BenchmarkLatency {
 
-    private static final int ITERATIONS = 10;
-    private static final int BATCH_SIZE = 1000 * 1000;
+    private static final int ITERATIONS = 1000000;
     private static final int BUFFER_SIZE = 1024 * 1024;
     private static final DecimalFormat doubleFormatter = (DecimalFormat) NumberFormat.getIntegerInstance();
 
@@ -23,6 +22,12 @@ public class BenchmarkThroughput {
         try {
 
             BenchmarkResults results = new BenchmarkResults();
+
+            List<String> col = new ArrayList<>();
+            col.add("");
+            col.add("Median Latency");
+            col.add("99% Below");
+            results.addColumn(col);
 
             CommandDispatcher abq = new ArrayBlockingQueueDispatcher(new AuctionServiceImpl(new InMemoryRepository()), BUFFER_SIZE, null);
 
@@ -36,7 +41,7 @@ public class BenchmarkThroughput {
 
             runFor(disruptor, results);
 
-            results.ExportToCSV("Throughput");
+            results.ExportToCSV("Latency");
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -45,7 +50,7 @@ public class BenchmarkThroughput {
 
     public static void runFor(CommandDispatcher dispatcher, BenchmarkResults results) throws Exception {
 
-        BenchmarkBase test = AuctionBenchmarks.THROUGHPUT.getInstance();
+        BenchmarkBase test = AuctionBenchmarks.INDIVIDUAL_LATENCY.getInstance();
 
         String placeBid = BenchmarkUtils.PrepareDispatcherAndGetPlaceBidCommand(dispatcher);
 
@@ -53,17 +58,10 @@ public class BenchmarkThroughput {
 
         column.add(dispatcher.getClass().getSimpleName());
 
-        //Warm up
-        test.run(dispatcher, placeBid, BATCH_SIZE);
+        test.run(dispatcher, placeBid, ITERATIONS);
 
-        for (int iteration = 0; iteration < ITERATIONS; iteration++) {
-
-            test.run(dispatcher, placeBid, BATCH_SIZE);
-
-            double commandsPerMillisecond = ((ThroughputBenchmark) test).getCommandsPerMillisecond();
-
-            column.add(doubleFormatter.format(commandsPerMillisecond));
-        }
+        column.add(doubleFormatter.format(((IndividualLatencyBenchmark) test).getMedianLatency()));
+        column.add(doubleFormatter.format(((IndividualLatencyBenchmark) test).getNinetyNinePercentBelow()));
 
         results.addColumn(column);
 

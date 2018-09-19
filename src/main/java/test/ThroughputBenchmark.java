@@ -10,21 +10,21 @@ public class ThroughputBenchmark implements BenchmarkBase {
     private double commandsPerMillisecond = -1;
 
     @Override
-    public void run(CommandDispatcher dispatcher, String command, int totalCommands) throws Exception {
+    public void run(CommandDispatcher dispatcher, String command, int batchSize) throws Exception {
 
-        CountDownLatch latch = new CountDownLatch(totalCommands);
+        CountDownLatch latch = new CountDownLatch(batchSize);
         dispatcher.setLatch(latch);
 
         long timerStart = System.nanoTime();
 
-        for (int commandCount = 0; commandCount < totalCommands; commandCount++)
+        for (int commandCount = 0; commandCount < batchSize; commandCount++)
             dispatcher.processCommand(command);
 
         long timerEnd = System.nanoTime();
         long elapsedTimeNano = timerEnd - timerStart;
         double elapsedMilli = TimeUnit.NANOSECONDS.toMillis(elapsedTimeNano);
 
-        commandsPerMillisecond = totalCommands / elapsedMilli;
+        commandsPerMillisecond = batchSize / elapsedMilli;
 
         latch.await();
 
