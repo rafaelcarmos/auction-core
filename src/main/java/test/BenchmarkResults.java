@@ -34,7 +34,7 @@ public class BenchmarkResults {
         for (int line = 0; line < maxLines; line++) {
 
             for (List<String> col : columns) {
-                csv.append(col.get(line)).append(',');
+                csv.append(col.get(line)).append(';');
             }
 
             csv.append('\n');

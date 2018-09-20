@@ -1,6 +1,6 @@
 package test;
 
-import messaging.CommandDispatcher;
+import messaging.dispatchers.CommandDispatcher;
 
 import java.util.concurrent.CountDownLatch;
 

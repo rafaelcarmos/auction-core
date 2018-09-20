@@ -16,7 +16,6 @@ public class ArrayBlockingQueueDispatcher extends BaseQueueDispatcher {
     @Override
     protected void InitializeQueues() {
 
-        this.mainInputQueue = new ArrayBlockingQueue<>(size);
         this.journalerInputQueue = new ArrayBlockingQueue<>(size);
         this.parserInputQueue = new ArrayBlockingQueue<>(size);
         this.journalerOutputQueue = new ArrayBlockingQueue<>(size);

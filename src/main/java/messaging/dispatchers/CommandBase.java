@@ -1,4 +1,4 @@
-package messaging;
+package messaging.dispatchers;
 
 import domain.auction.commands.Command;
 

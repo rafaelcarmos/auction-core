@@ -1,6 +1,6 @@
 package test;
 
-import messaging.CommandDispatcher;
+import messaging.dispatchers.CommandDispatcher;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +11,8 @@ public class ThroughputBenchmark implements BenchmarkBase {
 
     @Override
     public void run(CommandDispatcher dispatcher, String command, int batchSize) throws Exception {
+
+        System.out.println(dispatcher.getClass().getSimpleName());
 
         CountDownLatch latch = new CountDownLatch(batchSize);
         dispatcher.setLatch(latch);

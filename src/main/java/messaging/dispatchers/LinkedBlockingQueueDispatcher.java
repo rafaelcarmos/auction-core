@@ -16,7 +16,6 @@ public class LinkedBlockingQueueDispatcher extends BaseQueueDispatcher {
     @Override
     protected void InitializeQueues() {
 
-        this.mainInputQueue = new LinkedBlockingQueue<>(size);
         this.journalerInputQueue = new LinkedBlockingQueue<>(size);
         this.parserInputQueue = new LinkedBlockingQueue<>(size);
         this.journalerOutputQueue = new LinkedBlockingQueue<>(size);

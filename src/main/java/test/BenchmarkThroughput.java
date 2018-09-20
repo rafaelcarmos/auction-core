@@ -2,8 +2,8 @@ package test;
 
 import domain.auction.repository.InMemoryRepository;
 import domain.auction.service.AuctionServiceImpl;
-import messaging.CommandDispatcher;
 import messaging.dispatchers.ArrayBlockingQueueDispatcher;
+import messaging.dispatchers.CommandDispatcher;
 import messaging.dispatchers.DisruptorDispatcher;
 import messaging.dispatchers.LinkedBlockingQueueDispatcher;
 
@@ -11,13 +11,14 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class BenchmarkThroughput {
 
     private static final int ITERATIONS = 10;
     private static final int BATCH_SIZE = 1000 * 1000;
     private static final int BUFFER_SIZE = 1024 * 1024;
-    private static final DecimalFormat doubleFormatter = (DecimalFormat) NumberFormat.getIntegerInstance();
+    private static final DecimalFormat doubleFormatter = (DecimalFormat) NumberFormat.getIntegerInstance(Locale.US);
 
     public static void main(String[] args) {
         try {

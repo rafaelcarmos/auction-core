@@ -1,6 +1,6 @@
 package test;
 
-import messaging.CommandDispatcher;
+import messaging.dispatchers.CommandDispatcher;
 
 public interface BenchmarkBase {
 

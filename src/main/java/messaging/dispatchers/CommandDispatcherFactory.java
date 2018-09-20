@@ -1,8 +1,6 @@
-package messaging;
+package messaging.dispatchers;
 
 import domain.auction.service.AuctionService;
-import messaging.dispatchers.ArrayBlockingQueueDispatcher;
-import messaging.dispatchers.DisruptorDispatcher;
 
 import java.util.concurrent.CountDownLatch;
 

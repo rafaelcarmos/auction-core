@@ -2,7 +2,7 @@ package messaging.handlers;
 
 import com.lmax.disruptor.EventHandler;
 import domain.auction.service.AuctionService;
-import messaging.CommandBase;
+import messaging.dispatchers.CommandBase;
 
 import java.util.concurrent.CountDownLatch;
 

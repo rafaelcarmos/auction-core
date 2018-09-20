@@ -5,10 +5,6 @@ import com.lmax.disruptor.EventTranslatorOneArg;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import domain.auction.service.AuctionService;
-import messaging.CommandBase;
-import messaging.CommandDispatcher;
-import messaging.handlers.CommandJournaler;
-import messaging.handlers.CommandParser;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -23,7 +19,7 @@ public class DisruptorDispatcher extends CommandDispatcher {
         super(auctionService, size, latch);
 
         disruptor = new Disruptor<>(CommandBase::new, size, Executors.privilegedThreadFactory(), ProducerType.SINGLE, new BusySpinWaitStrategy());
-        disruptor.handleEventsWith(new CommandJournaler(), new CommandParser()).then(processor);
+        disruptor.handleEventsWith(journaler, parser).then(processor);
         disruptor.start();
     }
 

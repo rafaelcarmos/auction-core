@@ -2,7 +2,7 @@ package messaging.handlers;
 
 import com.lmax.disruptor.EventHandler;
 import domain.auction.commands.Command;
-import messaging.CommandBase;
+import messaging.dispatchers.CommandBase;
 
 public class CommandParser implements EventHandler<CommandBase> {
 

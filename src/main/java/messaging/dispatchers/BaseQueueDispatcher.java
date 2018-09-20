@@ -1,8 +1,6 @@
 package messaging.dispatchers;
 
 import domain.auction.service.AuctionService;
-import messaging.CommandBase;
-import messaging.CommandDispatcher;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -12,7 +10,6 @@ import java.util.concurrent.Executors;
 public abstract class BaseQueueDispatcher extends CommandDispatcher {
 
     private final ExecutorService executor;
-    protected BlockingQueue<CommandBase> mainInputQueue;
     protected BlockingQueue<CommandBase> journalerInputQueue;
     protected BlockingQueue<CommandBase> parserInputQueue;
     protected BlockingQueue<CommandBase> journalerOutputQueue;
@@ -27,7 +24,6 @@ public abstract class BaseQueueDispatcher extends CommandDispatcher {
 
         this.executor = Executors.newCachedThreadPool();
 
-        this.executor.submit(this::consumeMainInputQueue);
         this.executor.submit(this::consumeJournalerInputQueue);
         this.executor.submit(this::consumeParserInputQueue);
         this.executor.submit(this::consumeParserAndJournalerOuputQueue);
@@ -40,26 +36,9 @@ public abstract class BaseQueueDispatcher extends CommandDispatcher {
 
         CommandBase cmd = new CommandBase();
         cmd.setRawMessage(rawMessage);
-        mainInputQueue.put(cmd);
-    }
 
-    private void consumeMainInputQueue() {
-
-        while (!stopped) {
-
-            try {
-
-                while (!mainInputQueue.isEmpty()) {
-
-                    CommandBase cmd = mainInputQueue.take();
-
-                    journalerInputQueue.put(cmd);
-                    parserInputQueue.put(cmd);
-                }
-            } catch (Exception ex) {
-
-            }
-        }
+        journalerInputQueue.put(cmd);
+        parserInputQueue.put(cmd);
     }
 
     private void consumeJournalerInputQueue() {
@@ -77,7 +56,7 @@ public abstract class BaseQueueDispatcher extends CommandDispatcher {
                     journalerOutputQueue.put(cmd);
                 }
             } catch (Exception ex) {
-
+                ex.printStackTrace();
             }
         }
     }
@@ -97,7 +76,7 @@ public abstract class BaseQueueDispatcher extends CommandDispatcher {
                     parserOutputQueue.put(cmd);
                 }
             } catch (Exception ex) {
-
+                ex.printStackTrace();
             }
         }
     }
@@ -111,12 +90,12 @@ public abstract class BaseQueueDispatcher extends CommandDispatcher {
                 while (!journalerOutputQueue.isEmpty() && !parserOutputQueue.isEmpty()) {
 
                     journalerOutputQueue.take();
-                    CommandBase cmdParser = parserOutputQueue.take();
+                    CommandBase cmd = parserOutputQueue.take();
 
-                    processor.onEvent(cmdParser, -1, journalerOutputQueue.isEmpty() && parserOutputQueue.isEmpty());
+                    processor.onEvent(cmd, -1, journalerOutputQueue.isEmpty() && parserOutputQueue.isEmpty());
                 }
             } catch (Exception ex) {
-
+                ex.printStackTrace();
             }
         }
     }
@@ -128,7 +107,7 @@ public abstract class BaseQueueDispatcher extends CommandDispatcher {
 
         try {
 
-            executor.shutdownNow();
+            executor.shutdown();
             auctionService.close();
             journaler.close();
 
