@@ -31,7 +31,7 @@ public abstract class CommandDispatcher {
         this.processor.setLatch(latch);
     }
 
-    public abstract void processCommand(String rawMessage) throws Exception;
+    public abstract void processCommand(byte[] rawMessage) throws Exception;
 
     public abstract void shutdown();
 }

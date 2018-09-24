@@ -1,4 +1,4 @@
-package test;
+package test.benchmarks;
 
 import messaging.dispatchers.CommandDispatcher;
 
@@ -10,9 +10,9 @@ public class ThroughputBenchmark implements BenchmarkBase {
     private double commandsPerMillisecond = -1;
 
     @Override
-    public void run(CommandDispatcher dispatcher, String command, int batchSize) throws Exception {
+    public void run(CommandDispatcher dispatcher, byte[] command, int batchSize) throws Exception {
 
-        System.out.println(dispatcher.getClass().getSimpleName());
+        System.gc();
 
         CountDownLatch latch = new CountDownLatch(batchSize);
         dispatcher.setLatch(latch);
@@ -29,8 +29,6 @@ public class ThroughputBenchmark implements BenchmarkBase {
         commandsPerMillisecond = batchSize / elapsedMilli;
 
         latch.await();
-
-        System.gc();
     }
 
     public double getCommandsPerMillisecond() {

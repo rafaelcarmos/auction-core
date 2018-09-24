@@ -3,6 +3,8 @@ package domain.auction.commands;
 import domain.auction.Auction;
 import domain.auction.events.Event;
 
+import java.nio.ByteBuffer;
+
 public abstract class Command {
 
     private final String auctionId;
@@ -13,9 +15,9 @@ public abstract class Command {
         this.timestamp = timestamp;
     }
 
-    public static Command fromCSV(String csv, long timestamp) {
+    public static Command fromCSV(ByteBuffer csv, long timestamp) {
 
-        String[] fields = csv.split(";");
+        String[] fields = new String(csv.array()).trim().split(";");
 
         int currentIndex = 0;
         String auctionId;
@@ -32,8 +34,8 @@ public abstract class Command {
         switch (commandType) {
 
             case CREATE_AUCTION:
-                long auctioneerId = Long.parseLong(fields[currentIndex++]);
-                long itemId = Long.parseLong(fields[currentIndex++]);
+                long auctioneerId = Long.valueOf(fields[currentIndex++]);
+                long itemId = Long.valueOf(fields[currentIndex++]);
                 command = new CreateAuction(auctionId, timestamp, auctioneerId, itemId);
                 break;
 
@@ -50,8 +52,8 @@ public abstract class Command {
                 break;
 
             case PLACE_BID:
-                long bidderId = Long.parseLong(fields[currentIndex++]);
-                double bidAmount = Double.parseDouble(fields[currentIndex++]);
+                long bidderId = Long.valueOf(fields[currentIndex++]);
+                double bidAmount = Double.valueOf(fields[currentIndex++]);
                 command = new PlaceBid(auctionId, timestamp, bidderId, bidAmount);
                 break;
         }

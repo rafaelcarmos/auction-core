@@ -5,6 +5,7 @@ import messaging.dispatchers.CommandBase;
 
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -15,8 +16,9 @@ public class CommandJournaler implements EventHandler<CommandBase> {
 
     private final Path JOURNAL_DIRECTORY = Paths.get("F:/AuctionCoreCommandJournal/");
     private final int ONE_MEGA_BYTE = (1024 * 1024);
-    private final int BUFFER_SIZE = ONE_MEGA_BYTE * 4;
-    private final String lineSeparator = System.lineSeparator();
+    private final int BLOCK_SIZE = 4096;
+    private final int BUFFER_SIZE = BLOCK_SIZE * 8;
+    private final byte[] lineSeparator = System.lineSeparator().getBytes(StandardCharsets.UTF_8);
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
     private RandomAccessFile raf;
     private final ByteBuffer buffer;
@@ -41,12 +43,11 @@ public class CommandJournaler implements EventHandler<CommandBase> {
     public void onEvent(CommandBase commandBase, long sequence, boolean endOfBatch) {
         try {
 
-            byte[] bytes = (commandBase.getRawMessage() + lineSeparator).getBytes();
-
-            if ((bytes.length) >= buffer.remaining())
+            if ((commandBase.getRawMessage().capacity()) >= buffer.remaining())
                 writeBytes();
 
-            buffer.put(bytes);
+            buffer.put(commandBase.getRawMessage());
+            buffer.put(lineSeparator);
 
             if (endOfBatch) {
                 writeBytes();

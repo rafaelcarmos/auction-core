@@ -1,6 +1,9 @@
-package test;
+package test.util;
 
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -8,12 +11,16 @@ import java.util.List;
 
 public class BenchmarkResults {
 
+    private final Path resultsDirectory = Paths.get("F:/AuctionCoreResults/");
     private List<List<String>> columns;
     private int maxLines = 0;
 
-    public BenchmarkResults() {
+    public BenchmarkResults() throws Exception {
 
         this.columns = new ArrayList<>();
+
+        if (Files.notExists(resultsDirectory))
+            Files.createDirectory(resultsDirectory);
 
     }
 

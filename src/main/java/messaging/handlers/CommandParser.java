@@ -4,6 +4,8 @@ import com.lmax.disruptor.EventHandler;
 import domain.auction.commands.Command;
 import messaging.dispatchers.CommandBase;
 
+import java.nio.ByteBuffer;
+
 public class CommandParser implements EventHandler<CommandBase> {
 
     public CommandParser() {
@@ -15,7 +17,7 @@ public class CommandParser implements EventHandler<CommandBase> {
 
         try {
 
-            String csv = commandBase.getRawMessage();
+            ByteBuffer csv = commandBase.getRawMessage();
 
             Command command = Command.fromCSV(csv, System.currentTimeMillis());
 

@@ -1,10 +1,10 @@
-package test;
+package test.benchmarks;
 
 public enum AuctionBenchmarks {
 
-    LATENCY {
-        public LatencyBenchmark getInstance() {
-            return new LatencyBenchmark();
+    OVERALL_LATENCY {
+        public OverallLatencyBenchmark getInstance() {
+            return new OverallLatencyBenchmark();
         }
 
     },

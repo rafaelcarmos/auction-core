@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 
 public class DisruptorDispatcher extends CommandDispatcher {
 
-    private final EventTranslatorOneArg<CommandBase, String> translator = (event, sequence, rawMessage) -> event.setRawMessage(rawMessage);
+    private final EventTranslatorOneArg<CommandBase, byte[]> translator = (event, sequence, rawMessage) -> event.setRawMessage(rawMessage);
     private final Disruptor<CommandBase> disruptor;
 
     public DisruptorDispatcher(AuctionService auctionService, int size, CountDownLatch latch) throws Exception {
@@ -24,7 +24,7 @@ public class DisruptorDispatcher extends CommandDispatcher {
     }
 
     @Override
-    public void processCommand(String rawMessage) {
+    public void processCommand(byte[] rawMessage) {
         disruptor.publishEvent(translator, rawMessage);
     }
 

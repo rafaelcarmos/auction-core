@@ -1,4 +1,4 @@
-package test;
+package test.main;
 
 import domain.auction.repository.InMemoryRepository;
 import domain.auction.service.AuctionServiceImpl;
@@ -6,6 +6,11 @@ import messaging.dispatchers.ArrayBlockingQueueDispatcher;
 import messaging.dispatchers.CommandDispatcher;
 import messaging.dispatchers.DisruptorDispatcher;
 import messaging.dispatchers.LinkedBlockingQueueDispatcher;
+import test.benchmarks.AuctionBenchmarks;
+import test.benchmarks.BenchmarkBase;
+import test.benchmarks.OverallLatencyBenchmark;
+import test.util.BenchmarkResults;
+import test.util.BenchmarkUtils;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -13,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class BenchmarkThroughput {
+public class OverallLatencyTest {
 
     private static final int ITERATIONS = 10;
     private static final int BATCH_SIZE = 1000 * 1000;
@@ -37,7 +42,7 @@ public class BenchmarkThroughput {
 
             runFor(disruptor, results);
 
-            results.ExportToCSV("Throughput");
+            results.ExportToCSV("Overall_Latency");
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -46,9 +51,9 @@ public class BenchmarkThroughput {
 
     public static void runFor(CommandDispatcher dispatcher, BenchmarkResults results) throws Exception {
 
-        BenchmarkBase test = AuctionBenchmarks.THROUGHPUT.getInstance();
+        BenchmarkBase test = AuctionBenchmarks.OVERALL_LATENCY.getInstance();
 
-        String placeBid = BenchmarkUtils.PrepareDispatcherAndGetPlaceBidCommand(dispatcher);
+        byte[] placeBid = BenchmarkUtils.PrepareDispatcherAndGetPlaceBidCommand(dispatcher);
 
         List<String> column = new ArrayList<>();
 
@@ -61,7 +66,7 @@ public class BenchmarkThroughput {
 
             test.run(dispatcher, placeBid, BATCH_SIZE);
 
-            double commandsPerMillisecond = ((ThroughputBenchmark) test).getCommandsPerMillisecond();
+            double commandsPerMillisecond = ((OverallLatencyBenchmark) test).getAverageLatency();
 
             column.add(doubleFormatter.format(commandsPerMillisecond));
         }

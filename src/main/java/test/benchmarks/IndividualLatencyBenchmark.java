@@ -1,4 +1,4 @@
-package test;
+package test.benchmarks;
 
 import messaging.dispatchers.CommandDispatcher;
 
@@ -14,7 +14,9 @@ public class IndividualLatencyBenchmark implements BenchmarkBase {
 
 
     @Override
-    public void run(CommandDispatcher dispatcher, String command, int iterations) throws Exception {
+    public void run(CommandDispatcher dispatcher, byte[] command, int iterations) throws Exception {
+
+        System.gc();
 
         CountDownLatch latch = new CountDownLatch(1);
         dispatcher.setLatch(latch);
@@ -42,18 +44,14 @@ public class IndividualLatencyBenchmark implements BenchmarkBase {
                 maxIndex = i;
         }
 
-        System.out.format("%s | Max: %d | Index: %d \n", dispatcher.getClass().getSimpleName(), latencies[maxIndex], maxIndex);
-
         Arrays.sort(latencies);
 
-        int ninetyNinePercent = (int) (iterations * 99.9) / 100;
+        int ninetyNinePercent = ((int) (iterations * 99.5) / 100) - 1;
 
         minLatency = latencies[0];
         maxLatency = latencies[iterations - 1];
         ninetyNinePercentBelow = latencies[ninetyNinePercent];
         medianLatency = latencies[iterations / 2];
-
-        System.gc();
     }
 
     public long getNinetyNinePercentBelow() {

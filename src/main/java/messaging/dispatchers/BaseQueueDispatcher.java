@@ -32,7 +32,7 @@ public abstract class BaseQueueDispatcher extends CommandDispatcher {
     protected abstract void InitializeQueues();
 
     @Override
-    public void processCommand(String rawMessage) throws Exception {
+    public void processCommand(byte[] rawMessage) throws Exception {
 
         CommandBase cmd = new CommandBase();
         cmd.setRawMessage(rawMessage);
