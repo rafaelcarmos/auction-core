@@ -66,9 +66,9 @@ public class OverallLatencyTest {
 
             test.run(dispatcher, placeBid, BATCH_SIZE);
 
-            double commandsPerMillisecond = ((OverallLatencyBenchmark) test).getAverageLatency();
+            double averageLatency = ((OverallLatencyBenchmark) test).getAverageLatency();
 
-            column.add(doubleFormatter.format(commandsPerMillisecond));
+            column.add(doubleFormatter.format(averageLatency));
         }
 
         results.addColumn(column);

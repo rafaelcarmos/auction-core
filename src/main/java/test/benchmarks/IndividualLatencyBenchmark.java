@@ -46,7 +46,7 @@ public class IndividualLatencyBenchmark implements BenchmarkBase {
 
         Arrays.sort(latencies);
 
-        int ninetyNinePercent = ((int) (iterations * 99.5) / 100) - 1;
+        int ninetyNinePercent = ((iterations * 99) / 100) - 1;
 
         minLatency = latencies[0];
         maxLatency = latencies[iterations - 1];

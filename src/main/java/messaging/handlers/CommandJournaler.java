@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 
 public class CommandJournaler implements EventHandler<CommandBase> {
 
-    private final Path JOURNAL_DIRECTORY = Paths.get("F:/AuctionCoreCommandJournal/");
+    private final Path JOURNAL_DIRECTORY = Paths.get("/home/rafael/AuctionCoreCommandJournal/");
     private final int ONE_MEGA_BYTE = (1024 * 1024);
     private final int BLOCK_SIZE = 4096;
     private final int BUFFER_SIZE = BLOCK_SIZE * 8;
@@ -43,7 +43,7 @@ public class CommandJournaler implements EventHandler<CommandBase> {
     public void onEvent(CommandBase commandBase, long sequence, boolean endOfBatch) {
         try {
 
-            if ((commandBase.getRawMessage().capacity()) >= buffer.remaining())
+            if ((commandBase.getRawMessage().length + lineSeparator.length) >= buffer.remaining())
                 writeBytes();
 
             buffer.put(commandBase.getRawMessage());
@@ -65,7 +65,7 @@ public class CommandJournaler implements EventHandler<CommandBase> {
         raf.getChannel().write(buffer);
         buffer.clear();
 
-        if ((raf.length() / ONE_MEGA_BYTE) > 100) {
+        if ((raf.length() / ONE_MEGA_BYTE) > 1000) {
             raf.close();
             createNewJournal();
         }

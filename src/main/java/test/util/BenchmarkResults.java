@@ -11,7 +11,7 @@ import java.util.List;
 
 public class BenchmarkResults {
 
-    private final Path resultsDirectory = Paths.get("F:/AuctionCoreResults/");
+    private final Path resultsDirectory = Paths.get("/home/rafael/AuctionCoreResults/");
     private List<List<String>> columns;
     private int maxLines = 0;
 
@@ -47,7 +47,9 @@ public class BenchmarkResults {
             csv.append('\n');
         }
 
-        FileWriter writer = new FileWriter("Results_" + name + "_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".csv");
+        String fileName = "Results_" + name + "_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String path = Paths.get(resultsDirectory.toString(), fileName + ".csv").toString();
+        FileWriter writer = new FileWriter(path);
         writer.write(csv.toString());
         writer.close();
     }

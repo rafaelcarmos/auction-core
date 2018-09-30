@@ -3,8 +3,6 @@ package domain.auction.commands;
 import domain.auction.Auction;
 import domain.auction.events.Event;
 
-import java.nio.ByteBuffer;
-
 public abstract class Command {
 
     private final String auctionId;
@@ -15,9 +13,9 @@ public abstract class Command {
         this.timestamp = timestamp;
     }
 
-    public static Command fromCSV(ByteBuffer csv, long timestamp) {
+    public static Command fromCSV(byte[] csv, long timestamp) {
 
-        String[] fields = new String(csv.array()).trim().split(";");
+        String[] fields = new String(csv).trim().split(";");
 
         int currentIndex = 0;
         String auctionId;
